@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/bricolage-grotesque/wdth.css";
 import "@fontsource/ibm-plex-mono/400.css";
 import "./globals.css";
+import "./emul.css";
 
 export const metadata: Metadata = {
   title: "Daniel dos Santos, desenvolvedor web",
@@ -17,7 +18,7 @@ export default function Raiz({ children }: { children: React.ReactNode }) {
     <html lang="pt-BR" suppressHydrationWarning>
       <head><script dangerouslySetInnerHTML={{ __html: ANTES }} /></head>
       <body>
-        <noscript><style>{`.pre{display:none!important}.rev{opacity:1!important}`}</style></noscript>
+        <noscript><style>{`.pre{display:none!important}.entra{opacity:1!important}`}</style></noscript>
         {children}
       </body>
     </html>

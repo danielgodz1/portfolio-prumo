@@ -3,6 +3,27 @@ import Experience from "../components/Experience";
 import Cursor from "../components/Cursor";
 import SceneLoader from "../components/SceneLoader";
 import AsciiFoto from "../components/AsciiFoto";
+import Cena3D from "../components/Cena3D";
+import { CHECK, REQ } from "../lib/telas.js";
+import { Fragment } from "react";
+
+const EMULS: Record<string, any> = { flowcheck: CHECK, flowrequest: REQ };
+const Emul = ({ e }: { e: any }) => (
+  <section className={`emul emul--${e.tema}`} id={`emul-${e.id}`} data-passos={e.passos.length} data-passo="0" aria-labelledby={`em-${e.id}`}>
+    <div className="emul__palco">
+      <div className="emul__texto">
+        <p className="emul__kicker">Por dentro: {e.titulo}</p>
+        <h3 id={`em-${e.id}`} className="disp">O sistema real, passo a passo.</h3>
+        <ol className="emul__passos">{e.passos.map(([t, d]: string[], i: number) => (<li key={i} data-i={i}><strong>{t}</strong><span>{d}</span></li>))}</ol>
+        <p className="emul__aviso">Emulação feita por mim, com dados fictícios.</p>
+      </div>
+      <div className="emul__janela" aria-hidden="true">
+        <div className="jan__barra"><i /><i /><i /><span>{e.titulo}</span></div>
+        <div className="jan__corpo" dangerouslySetInnerHTML={{ __html: e.html }} />
+      </div>
+    </div>
+  </section>
+);
 
 const SOBRE = "Faço sites e sistemas que funcionam no dia a dia de quem trabalha: checklists de campo, requisições, configuradores 3D. Quando a história pede, a rolagem vira narrativa. Quando não pede, o site só precisa ser rápido e claro.";
 
@@ -40,14 +61,15 @@ export default function Page() {
               <span className="linha"><span className="split">Daniel</span></span>
               <span className="linha"><span className="split">dos Santos</span></span>
             </h1>
-            <p className="hero__intro rev">{SITE.intro}</p>
-            <p className="hero__dica cota rev">Role: a obra sobe. Dê dois cliques no topo para soltar o prumo.</p>
+            <p className="hero__intro entra">{SITE.intro}</p>
+            <p className="hero__dica cota entra">Role: a obra sobe. Dê dois cliques no topo para soltar o prumo.</p>
           </div>
         </section>
 
         <section id="projetos" aria-label="Projetos">
           {PROJETOS.map((p, i) => (
-            <article key={p.id} className="cena" data-cena="proj" aria-labelledby={`t-${p.id}`}>
+            <Fragment key={p.id}>
+            <article className="cena" data-cena="proj" aria-labelledby={`t-${p.id}`}>
               <div className="palco">
                 <div className={`proj ${i % 2 ? "proj--esq" : ""}`}>
                   <p className="proj__cota disp" aria-hidden="true">{p.cota}</p>
@@ -62,6 +84,9 @@ export default function Page() {
                 </div>
               </div>
             </article>
+            {EMULS[p.id] && <Emul e={EMULS[p.id]} />}
+            {p.id === "imperio" && <Cena3D />}
+            </Fragment>
           ))}
         </section>
 

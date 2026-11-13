@@ -33,7 +33,7 @@ export default function Experience() {
 
     // contadores (valor final sempre presente no DOM para reduce/noscript)
     const contadores = $("[data-conta]");
-    if (reduced) { contadores.forEach((c) => (c.textContent = c.dataset.conta!)); html.classList.add("pronto"); return cleanup0(); }
+    if (reduced) { contadores.forEach((c) => (c.textContent = c.dataset.conta!)); $(".emul").forEach((em) => { const n = Number(em.dataset.passos); $(".tela", em).forEach((t) => t.classList.toggle("on", Number(t.dataset.t) === n - 1)); $(".emul__passos li", em).forEach((l) => l.classList.add("on")); }); html.classList.add("pronto"); return cleanup0(); }
 
     function cleanup0() { return () => { removeEventListener("pointermove", onMove); removeEventListener("dblclick", dbl); removeEventListener("keydown", tecla); }; }
 
@@ -71,6 +71,22 @@ export default function Experience() {
             .to(palco, { opacity: 0, yPercent: -8, filter: "blur(10px)", duration: 0.25 }, 0.7)
             .to({}, { duration: 0.05 }, 0.95);
         }
+      });
+
+      // ---- emulações dos sistemas: a rolagem troca a tela (palco sticky, sem pin) ----
+      $(".emul").forEach((em) => {
+        em.classList.add("com-js");
+        const n = Number(em.dataset.passos), telas = $(".tela", em), lis = $(".emul__passos li", em), navs = $(".s-nav__i", em);
+        em.style.height = `${n * 70 + 100}vh`;
+        let atual = -1;
+        const ir = (i: number) => {
+          if (i === atual) return; atual = i; em.dataset.passo = String(i);
+          telas.forEach((t) => t.classList.toggle("on", Number(t.dataset.t) === i));
+          lis.forEach((l) => l.classList.toggle("on", Number(l.dataset.i) === i));
+          navs.forEach((x) => x.classList.toggle("ativo", x.dataset.ativo === String(i)));
+        };
+        ir(0);
+        ScrollTrigger.create({ trigger: em, start: "top top", end: "bottom bottom", onUpdate: (st) => ir(Math.min(n - 1, Math.floor(st.progress * n))) });
       });
 
       // ---- contadores ----
@@ -134,8 +150,8 @@ export default function Experience() {
         tl.to(o, { v: 100, duration: 1.8, ease: "power2.inOut", onUpdate: () => (num.textContent = String(Math.round(o.v)).padStart(3, "0")) })
           .to(".pre", { clipPath: "inset(0 0 100% 0)", duration: 1.1, ease: "expo.inOut" }, ">0.15")
           .from(sp.chars, { yPercent: 115, rotate: 6, duration: 1.1, ease: "expo.out", stagger: 0.035 }, "-=0.55")
-          .to(".rev", { opacity: 1, y: 0, duration: 0.9, ease: "power3.out", stagger: 0.12 }, "-=0.6");
-        gsap.set(".rev", { y: 20 });
+          .to(".entra", { opacity: 1, y: 0, duration: 0.9, ease: "power3.out", stagger: 0.12 }, "-=0.6");
+        gsap.set(".entra", { y: 20 });
       };
       document.fonts.ready.then(abrir);
     });

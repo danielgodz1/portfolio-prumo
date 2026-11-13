@@ -101,7 +101,7 @@ html.mouse.js .cursor { display: grid; }
 .cursor.is-drag { width: 70px; height: 70px; margin: -35px 0 0 -35px; }
 
 /* estados iniciais só quando há movimento */
-html.js .rev { opacity: 0; }
+html.js .entra { opacity: 0; }
 html.js .hero__nome .split { visibility: hidden; }
 html.js .hero__nome.dividido .split { visibility: visible; }
 .canvas-fundo { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
