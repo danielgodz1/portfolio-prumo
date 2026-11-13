@@ -4,6 +4,7 @@ import Cursor from "../components/Cursor";
 import SceneLoader from "../components/SceneLoader";
 import AsciiFoto from "../components/AsciiFoto";
 import Cena3D from "../components/Cena3D";
+import HudMissao from "../components/HudMissao";
 import { CHECK, REQ } from "../lib/telas.js";
 import { Fragment } from "react";
 
@@ -32,16 +33,25 @@ export default function Page() {
     <>
       <a className="pular" href="#conteudo">Pular para o conteúdo</a>
 
-      <div className="pre" aria-hidden="true">
+      <div className="pre" role="region" aria-label="Contagem de lançamento">
         <div className="pre__leg"><span>Daniel dos Santos</span><span className="cota">Jaú, SP</span></div>
-        <span />
+        <ul className="pre__check cota">
+          <li data-pre-check>[OK] MALHA_PRUMO</li>
+          <li data-pre-check>[OK] TELEMETRIA_SCROLL</li>
+          <li data-pre-check>[OK] PROPULSÃO_R3F</li>
+          <li data-pre-check>[OK] CANAL_JAU_SP</li>
+        </ul>
         <div className="pre__leg" style={{ alignItems: "end" }}>
-          <span className="pre__num disp" data-pre-num>000</span>
-          <span className="cota">carregando a obra</span>
+          <span className="pre__num disp" data-pre-num>03</span>
+          <div className="pre__acoes">
+            <span className="cota">prumo // missão 01</span>
+            <button type="button" className="pre__pular cota" data-pre-pular>Pular [ESC]</button>
+          </div>
         </div>
       </div>
 
       <SceneLoader />
+      <HudMissao />
       <Cursor />
 
       <header className="topo">
@@ -96,7 +106,8 @@ export default function Page() {
           </div>
         </div>
 
-        <section className="nums" aria-label="Em números">
+        <section className="nums" aria-label="Diário de bordo">
+          <p className="nums__rot cota">Diário de bordo</p>
           <div><b className="disp" data-conta="10">0</b><span>modelos de site, de academia a engenharia civil</span></div>
           <div><b className="disp" data-conta="3">0</b><span>projetos mostrados aqui, dois em produção</span></div>
           <div><b className="disp" data-conta="1">0</b><span>pessoa do briefing ao deploy</span></div>
@@ -132,7 +143,7 @@ export default function Page() {
         </section>
 
         <section className="contato" id="contato" aria-labelledby="t-contato">
-          <h2 id="t-contato" className="cota">Contato</h2>
+          <h2 id="t-contato" className="cota">Canal de transmissão, Jaú/SP</h2>
           <a className="cta disp" href={`mailto:${CONTATO.email}`} data-mag data-cursor="hover" aria-label="Vamos conversar: enviar e-mail">Vamos conversar</a>
           <p>{CONTATO.email}</p>
         </section>

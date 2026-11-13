@@ -3,13 +3,13 @@
 @tailwind utilities;
 
 :root {
-  --azul: #0F2C7A; --papel: #ECEEF0; --grafite: #151817; --giz: #FFD23F;
+  --azul: #0F2C7A; --espaco: #050B1E; --papel: #ECEEF0; --grafite: #151817; --giz: #FFD23F;
   --gut: clamp(1.25rem, 4vw, 4rem);
   --f-corpo: "Bricolage Grotesque Variable", system-ui, sans-serif;
   --f-cota: "IBM Plex Mono", ui-monospace, monospace;
   --out: cubic-bezier(.16, 1, .3, 1);
 }
-html { background: var(--azul); color: var(--papel); scroll-padding-top: 5rem; }
+html { background: var(--espaco); color: var(--papel); scroll-padding-top: 5rem; }
 html.mouse.js body, html.mouse.js a, html.mouse.js button { cursor: none; }
 body { margin: 0; font-family: var(--f-corpo); font-variation-settings: "wdth" 100; font-size: clamp(1.02rem, 1.1vw, 1.2rem); line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: clip; }
 html.lenis, html.lenis body { height: auto; }
@@ -27,11 +27,26 @@ a { color: inherit; text-decoration: none; }
 body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 90; opacity: .07; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>"); }
 
-/* preloader */
-.pre { position: fixed; inset: 0; z-index: 100; background: var(--grafite); color: var(--papel); display: grid; grid-template-rows: auto 1fr auto; padding: var(--gut); clip-path: inset(0); }
-.pre__num { font-size: clamp(7rem, 30vw, 26rem); line-height: .8; font-variant-numeric: tabular-nums; align-self: end; }
-.pre__leg { display: flex; justify-content: space-between; }
+/* preloader (Ato 0) */
+.pre { position: fixed; inset: 0; z-index: 100; background: var(--espaco); color: var(--papel); display: grid; grid-template-rows: auto 1fr auto; padding: var(--gut); clip-path: inset(0); }
+.pre__check { list-style: none; margin: 0; padding: 0; align-self: center; display: grid; gap: .45rem; }
+.pre__check li { opacity: .25; transform: translateX(-8px); }
+.pre__num { font-size: clamp(4.6rem, 22vw, 18rem); line-height: .82; font-variant-numeric: tabular-nums; align-self: end; color: var(--giz); }
+.pre__leg { display: flex; justify-content: space-between; gap: 1rem; }
+.pre__acoes { display: flex; flex-direction: column; align-items: flex-end; gap: .6rem; }
+.pre__pular { min-height: 44px; padding: 0 .9rem; background: transparent; border: 1.5px solid rgb(236 238 240 / .5); color: var(--papel); cursor: pointer; }
+.pre__pular:hover { border-color: var(--giz); color: var(--giz); }
 html.reduzir .pre, html.pronto .pre { display: none; }
+
+/* HUD de telemetria (Atos 0-3) */
+.hud-missao { position: fixed; left: var(--gut); right: var(--gut); bottom: 1rem; z-index: 45; display: flex; justify-content: space-between; align-items: center; gap: 1rem; pointer-events: none; transition: opacity .25s; }
+.hud-missao.is-oculto { opacity: 0; }
+.hud-missao__dados { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; padding: .4rem .8rem; background: rgb(5 11 30 / .72); backdrop-filter: blur(6px); border: 1px solid rgb(236 238 240 / .22); }
+.hud-missao__konami { color: var(--papel); background: var(--azul); padding: 0 .45rem; }
+.hud-missao__som { pointer-events: auto; min-height: 44px; padding: 0 .85rem; background: rgb(5 11 30 / .82); border: 1.5px solid rgb(236 238 240 / .35); color: var(--papel); cursor: pointer; font-family: var(--f-cota); font-size: .8rem; }
+.hud-missao__som[aria-pressed="true"] { border-color: var(--giz); color: var(--giz); }
+html.reduzir .hud-missao { display: none; }
+@media (max-width: 800px) { .hud-missao { bottom: .7rem; } .hud-missao__dados span:nth-child(n+3) { display: none; } }
 
 /* cabeçalho */
 .topo { position: fixed; inset: 0 0 auto 0; z-index: 50; display: flex; justify-content: space-between; align-items: center; padding: 1.1rem var(--gut); mix-blend-mode: difference; color: #fff; }
@@ -46,7 +61,7 @@ html.reduzir .pre, html.pronto .pre { display: none; }
 .hero__nome .linha { display: block; overflow: clip; padding-bottom: .08em; margin-bottom: -.08em; }
 .hero__nome .linha:nth-child(2) { margin-left: clamp(1rem, 12vw, 14rem); }
 .hero__intro { max-width: 34rem; margin: 2.2rem 0 0 auto; padding: 1rem 1.2rem; background: rgb(15 44 122 / .72); backdrop-filter: blur(6px); }
-.hero__dica { margin: 1.2rem 0 0; }
+.hero__dica { margin: 1.2rem 0 0; width: fit-content; padding: .35rem .75rem; background: rgb(15 44 122 / .78); backdrop-filter: blur(4px); }
 
 .proj { display: grid; grid-template-columns: repeat(12, 1fr); gap: 0 1.5rem; align-items: end; }
 .proj__cota { grid-column: 1 / 7; grid-row: 1; font-size: clamp(6rem, 22vw, 22rem); color: transparent; -webkit-text-stroke: 2px var(--papel); align-self: center; margin: 0; }
@@ -65,6 +80,7 @@ html.reduzir .pre, html.pronto .pre { display: none; }
 .faixa__item { font-size: clamp(3rem, 9vw, 9rem); padding-right: 4rem; white-space: nowrap; color: transparent; -webkit-text-stroke: 1.5px var(--papel); }
 .faixa__item:nth-child(3n) { color: var(--giz); -webkit-text-stroke: 0; }
 .nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; padding: clamp(3rem, 8vw, 7rem) var(--gut); }
+.nums__rot { grid-column: 1 / -1; margin: 0 0 .4rem; }
 .nums b { display: block; font-size: clamp(4rem, 12vw, 12rem); font-variant-numeric: tabular-nums; }
 .nums span { display: block; max-width: 14rem; }
 
