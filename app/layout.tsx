@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 };
 export const viewport: Viewport = { themeColor: "#0F2C7A", width: "device-width", initialScale: 1 };
 
-// Roda antes da pintura: define se há movimento (classe js) ou não (classe reduzir).
-const ANTES = `try{var h=document.documentElement;h.classList.add(matchMedia('(prefers-reduced-motion: reduce)').matches?'reduzir':'js');if(matchMedia('(hover:hover) and (pointer:fine)').matches)h.classList.add('mouse')}catch(e){}`;
+// Roda antes da pintura: respeita preferência salva ou prefers-reduced-motion, sem esconder conteúdo.
+const ANTES = `try{var h=document.documentElement;var pref=localStorage.getItem('prumo-motion');var red=pref?pref==='reduzido':matchMedia('(prefers-reduced-motion: reduce)').matches;h.classList.add(red?'reduzir':'js');if(!red&&pref==='ativo')h.classList.add('movimento-forcado');if(matchMedia('(hover:hover) and (pointer:fine)').matches)h.classList.add('mouse')}catch(e){}`;
 
 export default function Raiz({ children }: { children: React.ReactNode }) {
   return (

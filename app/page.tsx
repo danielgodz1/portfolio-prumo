@@ -33,18 +33,18 @@ export default function Page() {
     <>
       <a className="pular" href="#conteudo">Pular para o conteúdo</a>
 
-      <div className="pre" role="region" aria-label="Contagem de lançamento">
-        <div className="pre__leg"><span>Daniel dos Santos</span><span className="cota">Jaú, SP</span></div>
+      <div className="pre" role="region" aria-label="Calibração do eixo de prumo">
+        <div className="pre__leg"><span>Daniel dos Santos</span><span className="cota">22°17&apos;47&quot;S 48°33&apos;28&quot;W · Jaú/SP</span></div>
         <ul className="pre__check cota">
-          <li data-pre-check>[OK] MALHA_PRUMO</li>
-          <li data-pre-check>[OK] TELEMETRIA_SCROLL</li>
-          <li data-pre-check>[OK] PROPULSÃO_R3F</li>
-          <li data-pre-check>[OK] CANAL_JAU_SP</li>
+          <li data-pre-check>[OK] EIXO_DE_PRUMO</li>
+          <li data-pre-check>[OK] TENSAO_CABO_R3F</li>
+          <li data-pre-check>[OK] COTAS_DE_OBRA</li>
+          <li data-pre-check>[OK] ORIGEM_JAU_SP</li>
         </ul>
         <div className="pre__leg" style={{ alignItems: "end" }}>
           <span className="pre__num disp" data-pre-num>03</span>
           <div className="pre__acoes">
-            <span className="cota">prumo // missão 01</span>
+            <span className="cota">prumo // calibração 00</span>
             <button type="button" className="pre__pular cota" data-pre-pular>Pular [ESC]</button>
           </div>
         </div>
@@ -79,7 +79,7 @@ export default function Page() {
         <section id="projetos" aria-label="Projetos">
           {PROJETOS.map((p, i) => (
             <Fragment key={p.id}>
-            <article className="cena" data-cena="proj" aria-labelledby={`t-${p.id}`}>
+            <article className="cena" id={`proj-${p.id}`} data-cena="proj" aria-labelledby={`t-${p.id}`}>
               <div className="palco">
                 <div className={`proj ${i % 2 ? "proj--esq" : ""}`}>
                   <p className="proj__cota disp" aria-hidden="true">{p.cota}</p>

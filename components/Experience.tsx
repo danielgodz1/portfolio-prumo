@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -13,12 +13,29 @@ const $ = <T extends HTMLElement = HTMLElement>(s: string, r: ParentNode = docum
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 const KONAMI = ["arrowup", "arrowup", "arrowdown", "arrowdown", "arrowleft", "arrowright", "arrowleft", "arrowright", "b", "a"];
 
-/** Toda a coreografia do DOM: Ato 0 (contagem), rolagem Lenis, cenas, emulações, Konami e prumo. */
+/** Toda a coreografia do DOM: calibração inicial, rolagem Lenis, cenas, emulações, Konami e prumo. */
 export default function Experience() {
+  const [motionRev, setMotionRev] = useState(0);
+
+  useEffect(() => {
+    const onMotion = () => setMotionRev((v) => v + 1);
+    window.addEventListener("prumo:motion", onMotion);
+    return () => window.removeEventListener("prumo:motion", onMotion);
+  }, []);
+
   useEffect(() => {
     const html = document.documentElement;
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let pref: string | null = null;
+    try {
+      pref = localStorage.getItem("prumo-motion");
+    } catch {
+      pref = null;
+    }
+    const reduced = pref ? pref === "reduzido" : matchMedia("(prefers-reduced-motion: reduce)").matches;
     S.reduced = reduced;
+    html.classList.toggle("reduzir", reduced);
+    html.classList.toggle("js", !reduced);
+    html.classList.toggle("movimento-forcado", !reduced && pref === "ativo");
     const fine = matchMedia("(hover:hover) and (pointer:fine)").matches;
 
     // ponteiro: posição e velocidade para o prumo e constelação
@@ -32,9 +49,13 @@ export default function Experience() {
     };
     addEventListener("pointermove", onMove, { passive: true });
 
-    // easter egg: dois cliques no topo (ou tecla P) soltam o prumo; Konami ativa órbita extra
+    // easter egg: dois cliques no topo soltam o prumo em queda livre; tecla P dá impulso; Konami calibra 100%
     const soltar = () => {
-      S.swing += 1;
+      if (scrollY < innerHeight * 0.95) {
+        S.dropPending = true;
+      } else {
+        S.swing += 1;
+      }
       tocarPulso(360);
     };
     const dbl = (e: MouseEvent) => {
@@ -290,6 +311,13 @@ export default function Experience() {
       limpar.push(() => removeEventListener("keydown", onEsc));
 
       const abrir = () => {
+        if (S.ready) {
+          html.classList.add("pronto");
+          gsap.set(".entra", { opacity: 1, y: 0 });
+          lenis.start();
+          ScrollTrigger.refresh();
+          return;
+        }
         const sp = SplitText.create(nome.querySelectorAll(".split"), { type: "chars" });
         nome.classList.add("dividido");
         gsap.set(".entra", { y: 20 });
@@ -302,7 +330,7 @@ export default function Experience() {
           .call(() => { if (num) num.textContent = "03"; }, undefined, 0.25)
           .call(() => { if (num) num.textContent = "02"; }, undefined, 0.58)
           .call(() => { if (num) num.textContent = "01"; }, undefined, 0.91)
-          .call(() => { if (num) num.textContent = "IGNIÇÃO"; S.ignition = 1; }, undefined, 1.2)
+          .call(() => { if (num) num.textContent = "PRUMO"; S.ignition = 1; }, undefined, 1.2)
           .to(".pre", { clipPath: "inset(0 0 100% 0)", duration: 0.85, ease: "expo.inOut" }, 1.35)
           .from(sp.chars, { yPercent: 115, rotate: 6, duration: 0.95, ease: "expo.out", stagger: 0.03 }, "-=0.45")
           .to(".entra", { opacity: 1, y: 0, duration: 0.75, ease: "power3.out", stagger: 0.1 }, "-=0.5");
@@ -321,6 +349,6 @@ export default function Experience() {
       removeEventListener("dblclick", dbl);
       removeEventListener("keydown", tecla);
     };
-  }, []);
+  }, [motionRev]);
   return null;
 }

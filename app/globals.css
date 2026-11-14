@@ -38,15 +38,19 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-in
 .pre__pular:hover { border-color: var(--giz); color: var(--giz); }
 html.reduzir .pre, html.pronto .pre { display: none; }
 
-/* HUD de telemetria (Atos 0-3) */
-.hud-missao { position: fixed; left: var(--gut); right: var(--gut); bottom: 1rem; z-index: 45; display: flex; justify-content: space-between; align-items: center; gap: 1rem; pointer-events: none; transition: opacity .25s; }
+/* HUD de telemetria de engenharia (Prumo Laser) */
+.hud-missao { position: fixed; left: var(--gut); right: var(--gut); bottom: 1rem; z-index: 45; display: flex; justify-content: space-between; align-items: center; gap: .75rem; pointer-events: none; transition: opacity .25s; }
 .hud-missao.is-oculto { opacity: 0; }
-.hud-missao__dados { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; padding: .4rem .8rem; background: rgb(5 11 30 / .72); backdrop-filter: blur(6px); border: 1px solid rgb(236 238 240 / .22); }
-.hud-missao__konami { color: var(--papel); background: var(--azul); padding: 0 .45rem; }
-.hud-missao__som { pointer-events: auto; min-height: 44px; padding: 0 .85rem; background: rgb(5 11 30 / .82); border: 1.5px solid rgb(236 238 240 / .35); color: var(--papel); cursor: pointer; font-family: var(--f-cota); font-size: .8rem; }
-.hud-missao__som[aria-pressed="true"] { border-color: var(--giz); color: var(--giz); }
-html.reduzir .hud-missao { display: none; }
-@media (max-width: 800px) { .hud-missao { bottom: .7rem; } .hud-missao__dados span:nth-child(n+3) { display: none; } }
+.hud-missao__dados { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem 1.1rem; padding: .48rem .85rem; background: rgb(5 11 30 / .86); backdrop-filter: blur(8px); border: 1px solid rgb(236 238 240 / .26); font-variant-numeric: tabular-nums; }
+.hud-missao__cota { color: var(--papel); font-weight: 600; }
+.hud-missao__coord { color: rgb(236 238 240 / .86); }
+.hud-missao__konami { color: var(--grafite); background: var(--giz); padding: 0 .45rem; font-weight: 700; }
+.hud-missao__controles { display: flex; gap: .5rem; align-items: center; pointer-events: auto; }
+.hud-missao__ctrl { pointer-events: auto; min-height: 44px; padding: 0 .85rem; background: rgb(5 11 30 / .88); border: 1.5px solid rgb(236 238 240 / .38); color: var(--papel); cursor: pointer; font-family: var(--f-cota); font-size: .78rem; transition: border-color .2s, color .2s; }
+.hud-missao__ctrl:hover { border-color: var(--giz); color: var(--giz); }
+.hud-missao__ctrl[aria-pressed="true"] { border-color: var(--giz); color: var(--giz); }
+@media (max-width: 960px) { .hud-missao { bottom: .7rem; flex-wrap: wrap; } .hud-missao__coord { display: none; } }
+@media (max-width: 640px) { .hud-missao__dados span:nth-child(3) { display: none; } .hud-missao__ctrl { font-size: .72rem; padding: 0 .6rem; } }
 
 /* cabeçalho */
 .topo { position: fixed; inset: 0 0 auto 0; z-index: 50; display: flex; justify-content: space-between; align-items: center; padding: 1.1rem var(--gut); mix-blend-mode: difference; color: #fff; }
@@ -118,8 +122,9 @@ html.mouse.js .cursor { display: grid; }
 
 /* estados iniciais só quando há movimento */
 html.js .entra { opacity: 0; }
+html.reduzir .entra, html.pronto .entra { opacity: 1 !important; }
 html.js .hero__nome .split { visibility: hidden; }
-html.js .hero__nome.dividido .split { visibility: visible; }
+html.js .hero__nome.dividido .split, html.reduzir .hero__nome .split, html.pronto .hero__nome .split { visibility: visible; }
 .canvas-fundo { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
 main, .rodape { position: relative; z-index: 1; }
 
@@ -135,4 +140,6 @@ main, .rodape { position: relative; z-index: 1; }
   .nums { grid-template-columns: 1fr; }
   .hero__intro { margin-left: 0; }
 }
-@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; animation: none !important; transition: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  html:not(.movimento-forcado) * { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+}
