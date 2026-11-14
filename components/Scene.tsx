@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
 import { EffectComposer, Noise, Vignette, ChromaticAberration } from "@react-three/postprocessing";
@@ -7,7 +8,9 @@ import * as THREE from "three";
 import { S } from "../lib/store";
 import { tocarImpactoBase } from "../lib/som";
 import QuartoImperio, { QUARTO_ORIGEM } from "./QuartoImperio";
-import { ConstelacaoSkills, Estrelas3Camadas, GradeBaseShock, TerraOrbita } from "./MissaoObjetos";
+import { ConstelacaoSkills, Estrelas3Camadas, TerraOrbita } from "./MissaoObjetos";
+
+const GradeShockShader = dynamic(() => import("./GradeShockShader"), { ssr: false });
 
 const AZUL = new THREE.Color("#0F2C7A");
 const ESPACO = new THREE.Color("#050B1E");
@@ -492,16 +495,25 @@ export default function Scene() {
       const custom = e as CustomEvent<{ reduced: boolean }>;
       setReduzido(Boolean(custom.detail?.reduced));
     };
+    const onCanvasVis = (e: Event) => {
+      const custom = e as CustomEvent<{ visible: boolean }>;
+      const vis = Boolean(custom.detail?.visible);
+      S.paused = !vis || document.hidden;
+      setPausado(S.paused);
+    };
     document.addEventListener("visibilitychange", onVis);
     window.addEventListener("prumo:motion", onMotion);
+    window.addEventListener("prumo:canvas-visible", onCanvasVis);
     return () => {
       document.removeEventListener("visibilitychange", onVis);
       window.removeEventListener("prumo:motion", onMotion);
+      window.removeEventListener("prumo:canvas-visible", onCanvasVis);
     };
   }, []);
 
   return (
     <Canvas
+      aria-label="Cena 3D interativa do prumo de engenharia, andares em profundidade e maquete da Império Móveis Planejados"
       dpr={mobile ? [1, 1.25] : [1, 1.75]}
       frameloop={pausado ? "never" : reduzido ? "demand" : "always"}
       camera={{ fov: 48, position: [0, 0.5, 9], near: 0.1, far: 160 }}
@@ -527,7 +539,9 @@ export default function Scene() {
       <directionalLight position={[3, 6, 8]} intensity={2.4} color="#ffe9a8" />
       <Camera />
       <Obra mobile={mobile} />
-      <GradeBaseShock />
+      <Suspense fallback={null}>
+        <GradeShockShader />
+      </Suspense>
       <Prumo />
       <Estrelas3Camadas mobile={mobile} />
       <TerraOrbita />

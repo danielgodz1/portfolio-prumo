@@ -36,7 +36,6 @@ export default function Experience() {
     html.classList.toggle("reduzir", reduced);
     html.classList.toggle("js", !reduced);
     html.classList.toggle("movimento-forcado", !reduced && pref === "ativo");
-    const fine = matchMedia("(hover:hover) and (pointer:fine)").matches;
 
     // ponteiro: posição e velocidade para o prumo e constelação
     const onMove = (e: PointerEvent) => {
@@ -199,23 +198,6 @@ export default function Experience() {
           { opacity: 1, stagger: 0.08, ease: "none", scrollTrigger: { trigger: p, start: "top 82%", end: "bottom 45%", scrub: true } },
         );
       });
-
-      const card = $("[data-prev-card]")[0];
-      if (fine && card) {
-        const cx = gsap.quickTo(card, "x", { duration: 0.45, ease: "power3" }),
-          cy = gsap.quickTo(card, "y", { duration: 0.45, ease: "power3" });
-        addEventListener("pointermove", (e) => {
-          cx(e.clientX + 24);
-          cy(e.clientY + 24);
-        });
-        $("[data-prev]").forEach((a) => {
-          a.addEventListener("pointerenter", () => {
-            card.textContent = a.dataset.prev ?? "";
-            gsap.to(card, { opacity: 1, scale: 1, duration: 0.4, ease: "back.out(2)" });
-          });
-          a.addEventListener("pointerleave", () => gsap.to(card, { opacity: 0, scale: 0.7, duration: 0.25 }));
-        });
-      }
 
       $("[data-mag]").forEach((m) => {
         const qx = gsap.quickTo(m, "x", { duration: 0.6, ease: "elastic.out(1,0.4)" }),

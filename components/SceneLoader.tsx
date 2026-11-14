@@ -1,15 +1,35 @@
 "use client";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const Scene = dynamic(() => import("./Scene"), { ssr: false });
 
-/** Carrega a cena 3D só no cliente e só depois da primeira pintura (HTML semântico primeiro, LCP limpo). */
+/** Carrega a cena 3D só no cliente após a primeira pintura e pausa via IntersectionObserver se sair da viewport. */
 export default function SceneLoader() {
   const [ok, setOk] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const t = "requestIdleCallback" in window ? (window as any).requestIdleCallback(() => setOk(true), { timeout: 600 }) : setTimeout(() => setOk(true), 200);
     return () => ("cancelIdleCallback" in window ? (window as any).cancelIdleCallback(t) : clearTimeout(t));
   }, []);
-  return <div className="canvas-fundo" aria-hidden="true">{ok && <Scene />}</div>;
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        window.dispatchEvent(new CustomEvent("prumo:canvas-visible", { detail: { visible: entry.isIntersecting } }));
+      },
+      { threshold: 0.01 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div ref={wrapRef} className="canvas-fundo" aria-hidden="true">
+      {ok && <Scene />}
+    </div>
+  );
 }

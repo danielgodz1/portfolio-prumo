@@ -154,7 +154,6 @@ export default function Page() {
         <span>Feito com Next.js, React Three Fiber e GSAP</span>
       </footer>
 
-      <div className="prev" data-prev-card aria-hidden="true" />
       <Experience />
     </>
   );

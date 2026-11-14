@@ -172,7 +172,7 @@ html.reduzir .emul__palco { position: relative; height: auto; min-height: 90svh;
 .cena3d__texto h3 { margin-top: 0.3rem; font-size: clamp(2.2rem, 7vw, 5rem); font-weight: 780; line-height: 0.95; letter-spacing: -0.035em; }
 .cena3d__leg { margin-top: 1rem; max-width: 34ch; font-size: 1.05rem; line-height: 1.5; color: rgb(236 238 240 / .92); }
 .cena3d__fases { list-style: none; margin: 1.2rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
-.cena3d__fases li { padding: 0.25rem 0.6rem; border: 1px solid rgb(236 238 240 / .28); background: rgb(5 11 30 / .58); color: rgb(236 238 240 / .72); }
+.cena3d__fases li { padding: 0.28rem 0.65rem; border: 1px solid rgb(236 238 240 / .36); background: rgb(5 11 30 / .84); color: rgb(236 238 240 / .88); }
 .cena3d__fases li.ativo { border-color: var(--giz); color: var(--giz); background: rgb(15 44 122 / .86); }
 .cena3d__fases li.feita { border-color: rgb(236 238 240 / .55); color: var(--papel); }
 
