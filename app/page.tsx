@@ -7,6 +7,7 @@ import Cena3D from "../components/Cena3D";
 import HudMissao from "../components/HudMissao";
 import EmulLoader from "../components/EmulLoader";
 import ModelosShowcase from "../components/ModelosShowcase";
+import ContatoCanal from "../components/ContatoCanal";
 import { Fragment } from "react";
 
 const SOBRE = "Faço sites e sistemas que funcionam no dia a dia de quem trabalha: checklists de campo, requisições, configuradores 3D. Quando a história pede, a rolagem vira narrativa. Quando não pede, o site só precisa ser rápido e claro.";
@@ -54,8 +55,23 @@ export default function Page() {
               <span className="linha"><span className="split">Daniel</span></span>
               <span className="linha"><span className="split">dos Santos</span></span>
             </h1>
-            <p className="hero__intro entra">{SITE.intro}</p>
-            <p className="hero__dica cota entra">Role: a obra sobe. Dê dois cliques no topo para soltar o prumo.</p>
+            <div className="hero__painel entra">
+              <p className="hero__intro">{SITE.intro}</p>
+              <ul className="hero__provas cota" aria-label="Evidências em produção">
+                <li>FlowCheck e FlowRequest em uso</li>
+                <li>Império 3D publicado</li>
+                <li>10 modelos por segmento</li>
+              </ul>
+              <div className="hero__acoes">
+                <a href="#proj-flowcheck" className="hero__cta hero__cta--prim" data-mag data-cursor="hover">
+                  Ver sistemas e obras ↓
+                </a>
+                <a href="#contato" className="hero__cta hero__cta--sec" data-cursor="hover" data-swap>
+                  Falar sobre um projeto →
+                </a>
+              </div>
+              <p className="hero__dica cota">Role: a obra sobe · Duplo clique no topo solta o prumo</p>
+            </div>
           </div>
         </section>
 
@@ -100,9 +116,18 @@ export default function Page() {
 
         <section className="nums" aria-label="Diário de bordo">
           <p className="nums__rot cota">Diário de bordo</p>
-          <div><b className="disp" data-conta="10">0</b><span>modelos de site, de academia a engenharia civil</span></div>
-          <div><b className="disp" data-conta="3">0</b><span>projetos mostrados aqui, dois em produção</span></div>
-          <div><b className="disp" data-conta="1">0</b><span>pessoa do briefing ao deploy</span></div>
+          <div>
+            <b className="disp nums__odometro" data-conta="10" data-target="10" aria-label="10 modelos de site">10</b>
+            <span>modelos de site, de academia a engenharia civil</span>
+          </div>
+          <div>
+            <b className="disp nums__odometro" data-conta="3" data-target="3" aria-label="3 projetos mostrados aqui">3</b>
+            <span>projetos mostrados aqui, dois em produção</span>
+          </div>
+          <div>
+            <b className="disp nums__odometro" data-conta="1" data-target="1" aria-label="1 pessoa do briefing ao deploy">1</b>
+            <span>pessoa do briefing ao deploy</span>
+          </div>
         </section>
 
         <ModelosShowcase />
@@ -121,11 +146,7 @@ export default function Page() {
           </div>
         </section>
 
-        <section className="contato" id="contato" aria-labelledby="t-contato">
-          <h2 id="t-contato" className="cota">Canal de transmissão, Jaú/SP</h2>
-          <a className="cta disp" href={`mailto:${CONTATO.email}`} data-mag data-cursor="hover" aria-label="Vamos conversar: enviar e-mail">Vamos conversar</a>
-          <p>{CONTATO.email}</p>
-        </section>
+        <ContatoCanal />
       </main>
 
       <footer className="rodape cota">

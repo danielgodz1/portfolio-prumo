@@ -161,19 +161,33 @@ export default function Experience() {
       });
 
       contadores.forEach((c) => {
-        const alvo = Number(c.dataset.conta);
+        const alvo = Number(c.dataset.target ?? c.dataset.conta);
+        c.textContent = String(alvo);
         const o = { v: 0 };
         ScrollTrigger.create({
           trigger: c,
-          start: "top 85%",
+          start: "top 88%",
           once: true,
-          onEnter: () =>
-            gsap.to(o, {
-              v: alvo,
-              duration: 1.5,
-              ease: "expo.out",
-              onUpdate: () => (c.textContent = String(Math.round(o.v))),
-            }),
+          onEnter: () => {
+            c.classList.add("rodando");
+            gsap.fromTo(
+              o,
+              { v: 0 },
+              {
+                v: alvo,
+                duration: 1.1,
+                ease: "expo.out",
+                onUpdate: () => {
+                  c.textContent = String(Math.round(o.v));
+                },
+                onComplete: () => {
+                  c.textContent = String(alvo);
+                  c.classList.remove("rodando");
+                  c.classList.add("cravado");
+                },
+              },
+            );
+          },
         });
       });
 
