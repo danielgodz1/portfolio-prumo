@@ -1,4 +1,4 @@
-import { SITE, CONTATO, PROJETOS, MODELOS, STACK } from "../lib/dados";
+import { SITE, CONTATO, PROJETOS, STACK } from "../lib/dados";
 import Experience from "../components/Experience";
 import Cursor from "../components/Cursor";
 import SceneLoader from "../components/SceneLoader";
@@ -6,6 +6,7 @@ import AsciiFoto from "../components/AsciiFoto";
 import Cena3D from "../components/Cena3D";
 import HudMissao from "../components/HudMissao";
 import EmulLoader from "../components/EmulLoader";
+import ModelosShowcase from "../components/ModelosShowcase";
 import { Fragment } from "react";
 
 const SOBRE = "Faço sites e sistemas que funcionam no dia a dia de quem trabalha: checklists de campo, requisições, configuradores 3D. Quando a história pede, a rolagem vira narrativa. Quando não pede, o site só precisa ser rápido e claro.";
@@ -104,20 +105,7 @@ export default function Page() {
           <div><b className="disp" data-conta="1">0</b><span>pessoa do briefing ao deploy</span></div>
         </section>
 
-        <section className="sec" id="modelos" aria-labelledby="t-modelos">
-          <h2 id="t-modelos" className="disp">Modelos para o seu negócio</h2>
-          <ul className="lista">
-            {MODELOS.map((m, i) => (
-              <li key={m.slug}>
-                <a href={m.url} target="_blank" rel="noopener noreferrer" data-cursor="view" data-prev={m.conceito}>
-                  <span className="n" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-                  <span className="nome disp" data-swap>{m.nome}</span>
-                  <span className="conc">{m.conceito}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <ModelosShowcase />
 
         <section className="sec" id="sobre" aria-labelledby="t-sobre">
           <h2 id="t-sobre" className="disp">Sobre</h2>

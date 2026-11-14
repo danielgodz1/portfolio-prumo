@@ -44,16 +44,23 @@ export const PROJETOS: Projeto[] = [
   },
 ];
 const BASE = "https://portfolio-programacao1.vercel.app/modelos/";
-export const MODELOS = [
-  ["academia", "Academia", "A rolagem carrega a barra; treinos como repetições."],
-  ["roupas", "Roupas", "Arara que balança com a rolagem e provador de cores."],
-  ["perfumes", "Perfumes", "A rolagem é o tempo do perfume na pele."],
-  ["beleza", "Beleza", "Olho real ganha cílios na rolagem; agenda e sacola."],
-  ["restaurante", "Restaurante", "O prato se monta em camadas; cardápio e reserva."],
-  ["hamburgueria", "Hamburgueria", "Lanche que se monta e pedido pelo WhatsApp."],
-  ["pizzaria", "Pizzaria", "Pizza que se monta e pedido pelo WhatsApp."],
-  ["arquitetura", "Arquitetura", "A casa se constrói na rolagem; maquete 3D."],
-  ["marcenaria", "Marcenaria", "Armário 3D que abre em peças e vira orçamento."],
-  ["engenharia", "Engenharia", "Prédio que sobe andar por andar; quantitativo ao vivo."],
-].map(([slug, nome, conceito]) => ({ slug, nome, conceito, url: BASE + slug + "/" }));
+export type Modelo = {
+  slug: string;
+  nome: string;
+  conceito: string;
+  mecanica: string;
+  url: string;
+};
+export const MODELOS: Modelo[] = [
+  ["academia", "Academia", "A rolagem carrega a barra; treinos como repetições.", "FÍSICA DE BARRA NO SCROLL"],
+  ["roupas", "Roupas", "Arara que balança com a rolagem e provador de cores.", "PROVADOR DE CORES"],
+  ["perfumes", "Perfumes", "A rolagem é o tempo do perfume na pele.", "PIRÂMIDE OLFATIVA NO TEMPO"],
+  ["beleza", "Beleza", "Olho real ganha cílios na rolagem; agenda e sacola.", "CAMADAS & AGENDA AO VIVO"],
+  ["restaurante", "Restaurante", "O prato se monta em camadas; cardápio e reserva.", "MONTAGEM EM CAMADAS"],
+  ["hamburgueria", "Hamburgueria", "Lanche que se monta e pedido pelo WhatsApp.", "MONTAGEM & PEDIDO WHATSAPP"],
+  ["pizzaria", "Pizzaria", "Pizza que se monta e pedido pelo WhatsApp.", "FATIAS & MONTE A PIZZA"],
+  ["arquitetura", "Arquitetura", "A casa se constrói na rolagem; maquete 3D.", "MAQUETE 3D NA ROLAGEM"],
+  ["marcenaria", "Marcenaria", "Armário 3D que abre em peças e vira orçamento.", "EXPLODED VIEW 3D"],
+  ["engenharia", "Engenharia", "Prédio que sobe andar por andar; quantitativo ao vivo.", "QUANTITATIVO AO VIVO"],
+].map(([slug, nome, conceito, mecanica]) => ({ slug, nome, conceito, mecanica, url: BASE + slug + "/" }));
 export const STACK = ["React 19", "TypeScript", "Next.js", "Three.js", "GSAP", "Lenis", "Supabase", "PostgreSQL", "Node.js", "Tailwind", "Vercel", "Groq"];
