@@ -12,6 +12,12 @@ export default function NaviHud() {
   const [transmitindo, setTransmitindo] = useState(false);
 
   useEffect(() => {
+    if (window.innerWidth < 960) {
+      setMinimizado(true);
+    }
+  }, []);
+
+  useEffect(() => {
     const id = window.setInterval(() => {
       if (S.camara !== camara) {
         setCamara(S.camara);

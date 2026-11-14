@@ -6,7 +6,8 @@
     "dev": "next dev -p 3100",
     "build": "next build",
     "start": "next start -p 3100",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "playwright test"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "^5.3.0",
@@ -29,6 +30,7 @@
     "three": "^0.170.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "typescript": "^5.9.3"
   }
 }
