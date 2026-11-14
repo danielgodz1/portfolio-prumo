@@ -122,8 +122,13 @@ export default function ModelosShowcase() {
 
   useEffect(() => {
     const onMotion = () => setMotionRev((v) => v + 1);
+    const onModo2D = () => setMotionRev((v) => v + 1);
     window.addEventListener("prumo:motion", onMotion);
-    return () => window.removeEventListener("prumo:motion", onMotion);
+    window.addEventListener("prumo:modo2d", onModo2D);
+    return () => {
+      window.removeEventListener("prumo:motion", onMotion);
+      window.removeEventListener("prumo:modo2d", onModo2D);
+    };
   }, []);
 
   useEffect(() => {
@@ -132,7 +137,7 @@ export default function ModelosShowcase() {
     const track = trackRef.current;
     if (!sec || !vp || !track) return;
 
-    const isDesktop = () => window.innerWidth >= 900;
+    const isDesktop = () => window.innerWidth >= 900 && !S.modo2D;
 
     if (S.reduced || !isDesktop()) {
       track.style.transform = "";
@@ -212,12 +217,30 @@ export default function ModelosShowcase() {
     }
   };
 
+  const onCardMove = (e: React.MouseEvent<HTMLElement>) => {
+    if (S.reduced) return;
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const nx = (e.clientX - r.left) / r.width - 0.5;
+    const ny = (e.clientY - r.top) / r.height - 0.5;
+    el.style.setProperty("--rx", `${(-ny * 10).toFixed(2)}deg`);
+    el.style.setProperty("--ry", `${(nx * 12).toFixed(2)}deg`);
+    el.style.setProperty("--mx", `${((nx + 0.5) * 100).toFixed(1)}%`);
+    el.style.setProperty("--my", `${((ny + 0.5) * 100).toFixed(1)}%`);
+  };
+
+  const onCardLeave = (e: React.MouseEvent<HTMLElement>) => {
+    const el = e.currentTarget;
+    el.style.setProperty("--rx", "0deg");
+    el.style.setProperty("--ry", "0deg");
+  };
+
   return (
-    <section ref={secRef} className="modelos-sec" id="modelos" aria-labelledby="t-modelos">
+    <section ref={secRef} className="modelos-sec" id="camara-03" aria-labelledby="t-modelos">
       <div className="modelos-palco">
         <header className="modelos-cabecalho">
           <div>
-            <p className="cota">Cota +12,00 m · 10 segmentos em produção conceitual</p>
+            <p className="cota">Câmara 03 · O Portal dos 10 Modelos · Cartuchos Interativos</p>
             <h2 id="t-modelos" className="disp">
               Modelos para o seu negócio
             </h2>
@@ -238,13 +261,18 @@ export default function ModelosShowcase() {
         <div ref={viewportRef} className="modelos-vp">
           <div ref={trackRef} className="modelos-trilha">
             {MODELOS.map((m, i) => (
-              <article key={m.slug} className="mod-card">
+              <article
+                key={m.slug}
+                className="mod-card mod-card--tilt"
+                onMouseMove={onCardMove}
+                onMouseLeave={onCardLeave}
+              >
                 <a
                   href={m.url}
                   target="_blank"
                   rel="noopener noreferrer"
                   data-cursor="view"
-                  aria-label={`Modelo ${String(i + 1).padStart(2, "0")} ${m.nome}: ${m.conceito} Abrir demonstração`}
+                  aria-label={`Cartucho ${String(i + 1).padStart(2, "0")} ${m.nome}: ${m.conceito} Abrir demonstração`}
                 >
                   <div className="mod-card__topo">
                     <span className="mod-card__num disp" aria-hidden="true">
@@ -258,13 +286,13 @@ export default function ModelosShowcase() {
                   <div className="mod-card__base">
                     <h3 className="mod-card__nome disp">{m.nome}</h3>
                     <p className="mod-card__conc">{m.conceito}</p>
-                    <span className="mod-card__acao cota">Abrir modelo ao vivo ↗</span>
+                    <span className="mod-card__acao cota">Carregar cartucho ao vivo ↗</span>
                   </div>
                 </a>
               </article>
             ))}
 
-            <article className="mod-card mod-card--cta">
+            <article className="mod-card mod-card--cta mod-card--tilt" onMouseMove={onCardMove} onMouseLeave={onCardLeave}>
               <div className="mod-card__cta-inner">
                 <span className="cota">SOB MEDIDA · JAÚ/SP PARA QUALQUER CIDADE</span>
                 <h3 className="disp">Seu negócio pede um site com esse nível de acabamento?</h3>

@@ -19,8 +19,13 @@ export default function Experience() {
 
   useEffect(() => {
     const onMotion = () => setMotionRev((v) => v + 1);
+    const onModo2D = () => setMotionRev((v) => v + 1);
     window.addEventListener("prumo:motion", onMotion);
-    return () => window.removeEventListener("prumo:motion", onMotion);
+    window.addEventListener("prumo:modo2d", onModo2D);
+    return () => {
+      window.removeEventListener("prumo:motion", onMotion);
+      window.removeEventListener("prumo:modo2d", onModo2D);
+    };
   }, []);
 
   useEffect(() => {
@@ -140,7 +145,12 @@ export default function Experience() {
       gsap.ticker.add(skewTick);
       limpar.push(() => gsap.ticker.remove(skewTick));
 
+      if (S.modo2D) {
+        gsap.set(".palco", { clearProps: "opacity,transform,filter" });
+      }
+
       $("[data-cena]").forEach((cena) => {
+        if (S.modo2D) return;
         const palco = cena.querySelector(".palco")!;
         const hero = cena.dataset.cena === "hero";
         const tl = gsap.timeline({

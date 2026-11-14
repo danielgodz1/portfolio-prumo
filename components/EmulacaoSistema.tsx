@@ -34,15 +34,20 @@ export default function EmulacaoSistema({ id }: Props) {
 
   useEffect(() => {
     const onMotion = () => setMotionRev((v) => v + 1);
+    const onModo2D = () => setMotionRev((v) => v + 1);
     window.addEventListener("prumo:motion", onMotion);
-    return () => window.removeEventListener("prumo:motion", onMotion);
+    window.addEventListener("prumo:modo2d", onModo2D);
+    return () => {
+      window.removeEventListener("prumo:motion", onMotion);
+      window.removeEventListener("prumo:modo2d", onModo2D);
+    };
   }, []);
 
   useEffect(() => {
     const sec = secRef.current;
     if (!sec) return;
 
-    if (S.reduced) {
+    if (S.reduced || S.modo2D) {
       setPassoAtivo(0);
       setSub(1);
       if (janRef.current) janRef.current.style.transform = "";

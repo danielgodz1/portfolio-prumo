@@ -24,8 +24,13 @@ export default function Cena3D() {
 
   useEffect(() => {
     const onMotion = () => setMotionRev((v) => v + 1);
+    const onModo2D = () => setMotionRev((v) => v + 1);
     window.addEventListener("prumo:motion", onMotion);
-    return () => window.removeEventListener("prumo:motion", onMotion);
+    window.addEventListener("prumo:modo2d", onModo2D);
+    return () => {
+      window.removeEventListener("prumo:motion", onMotion);
+      window.removeEventListener("prumo:modo2d", onModo2D);
+    };
   }, []);
 
   useEffect(() => {
@@ -38,7 +43,7 @@ export default function Cena3D() {
       return () => clearTimeout(t);
     }
 
-    if (S.reduced) {
+    if (S.reduced || S.modo2D) {
       const io = new IntersectionObserver(
         ([e]) => {
           S.quartoActive = e.isIntersecting ? 1 : 0;
