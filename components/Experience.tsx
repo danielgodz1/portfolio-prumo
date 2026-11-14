@@ -83,11 +83,6 @@ export default function Experience() {
     const contadores = $("[data-conta]");
     if (reduced) {
       contadores.forEach((c) => (c.textContent = c.dataset.conta!));
-      $(".emul").forEach((em) => {
-        const n = Number(em.dataset.passos);
-        $(".tela", em).forEach((t) => t.classList.toggle("on", Number(t.dataset.t) === n - 1));
-        $(".emul__passos li", em).forEach((l) => l.classList.add("on"));
-      });
       const onRedScroll = () => {
         const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
         S.progress = clamp(scrollY / max, 0, 1);
@@ -163,31 +158,6 @@ export default function Experience() {
             .to(palco, { opacity: 0, yPercent: -8, filter: "blur(8px)", duration: 0.25 }, 0.7)
             .to({}, { duration: 0.05 }, 0.95);
         }
-      });
-
-      $(".emul").forEach((em) => {
-        em.classList.add("com-js");
-        const n = Number(em.dataset.passos),
-          telas = $(".tela", em),
-          lis = $(".emul__passos li", em),
-          navs = $(".s-nav__i", em);
-        em.style.height = `${n * 70 + 100}vh`;
-        let atual = -1;
-        const ir = (i: number) => {
-          if (i === atual) return;
-          atual = i;
-          em.dataset.passo = String(i);
-          telas.forEach((t) => t.classList.toggle("on", Number(t.dataset.t) === i));
-          lis.forEach((l) => l.classList.toggle("on", Number(l.dataset.i) === i));
-          navs.forEach((x) => x.classList.toggle("ativo", x.dataset.ativo === String(i)));
-        };
-        ir(0);
-        ScrollTrigger.create({
-          trigger: em,
-          start: "top top",
-          end: "bottom bottom",
-          onUpdate: (st) => ir(Math.min(n - 1, Math.floor(st.progress * n))),
-        });
       });
 
       contadores.forEach((c) => {

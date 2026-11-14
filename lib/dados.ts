@@ -9,7 +9,16 @@ export const CONTATO = {
   github: "https://github.com/danielgodz1",
   linkedin: "https://www.linkedin.com/in/danieldossantos-ti",
 };
-export type Projeto = { id: string; nome: string; resumo: string; texto: string; fatos: [string, string][]; link?: { t: string; u: string }; cota: string };
+export type Projeto = {
+  id: string;
+  nome: string;
+  resumo: string;
+  texto: string;
+  fatos: [string, string][];
+  link?: { t: string; u: string };
+  links?: { t: string; u: string }[];
+  cota: string;
+};
 export const PROJETOS: Projeto[] = [
   {
     id: "flowcheck", nome: "FlowCheck", cota: "+3,00",
@@ -28,7 +37,10 @@ export const PROJETOS: Projeto[] = [
     resumo: "Site e configurador 3D para uma marcenaria de Jaú.",
     texto: "A Império faz móveis planejados em Jaú, SP. Eu cuidei da direção de arte e do código. Tudo parte de uma linha de lápis: ela desenha a planta na abertura, guia a rolagem e contorna o ambiente no 3D.",
     fatos: [["Cliente", "Império Móveis Planejados, Jaú/SP"], ["Meu papel", "Direção de arte e front-end"], ["Tecnologia", "React, TypeScript, Three.js, GSAP, Lenis, Zustand"]],
-    link: { t: "Instagram da Império", u: "https://www.instagram.com/imperio.moveis.jau/" },
+    links: [
+      { t: "Visitar site ao vivo ↗", u: "https://www.imperiomoveisplanejadosjau.com.br/" },
+      { t: "Instagram da Império ↗", u: "https://www.instagram.com/imperio.moveis.jau/" },
+    ],
   },
 ];
 const BASE = "https://portfolio-programacao1.vercel.app/modelos/";

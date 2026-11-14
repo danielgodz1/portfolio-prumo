@@ -5,26 +5,8 @@ import SceneLoader from "../components/SceneLoader";
 import AsciiFoto from "../components/AsciiFoto";
 import Cena3D from "../components/Cena3D";
 import HudMissao from "../components/HudMissao";
-import { CHECK, REQ } from "../lib/telas.js";
+import EmulLoader from "../components/EmulLoader";
 import { Fragment } from "react";
-
-const EMULS: Record<string, any> = { flowcheck: CHECK, flowrequest: REQ };
-const Emul = ({ e }: { e: any }) => (
-  <section className={`emul emul--${e.tema}`} id={`emul-${e.id}`} data-passos={e.passos.length} data-passo="0" aria-labelledby={`em-${e.id}`}>
-    <div className="emul__palco">
-      <div className="emul__texto">
-        <p className="emul__kicker">Por dentro: {e.titulo}</p>
-        <h3 id={`em-${e.id}`} className="disp">O sistema real, passo a passo.</h3>
-        <ol className="emul__passos">{e.passos.map(([t, d]: string[], i: number) => (<li key={i} data-i={i}><strong>{t}</strong><span>{d}</span></li>))}</ol>
-        <p className="emul__aviso">Emulação feita por mim, com dados fictícios.</p>
-      </div>
-      <div className="emul__janela" aria-hidden="true">
-        <div className="jan__barra"><i /><i /><i /><span>{e.titulo}</span></div>
-        <div className="jan__corpo" dangerouslySetInnerHTML={{ __html: e.html }} />
-      </div>
-    </div>
-  </section>
-);
 
 const SOBRE = "Faço sites e sistemas que funcionam no dia a dia de quem trabalha: checklists de campo, requisições, configuradores 3D. Quando a história pede, a rolagem vira narrativa. Quando não pede, o site só precisa ser rápido e claro.";
 
@@ -89,12 +71,21 @@ export default function Page() {
                     <p>{p.resumo}</p>
                     <p>{p.texto}</p>
                     <dl>{p.fatos.map(([k, v]) => (<div key={k} style={{ display: "contents" }}><dt>{k}</dt><dd>{v}</dd></div>))}</dl>
-                    {p.link && <a className="link-giz" href={p.link.u} target="_blank" rel="noopener noreferrer" data-cursor="view" data-swap>{p.link.t}</a>}
+                    {p.links && (
+                      <div className="proj__links">
+                        {p.links.map((lk) => (
+                          <a key={lk.u} className="link-giz" href={lk.u} target="_blank" rel="noopener noreferrer" data-cursor="view" data-swap>
+                            {lk.t}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                    {!p.links && p.link && <a className="link-giz" href={p.link.u} target="_blank" rel="noopener noreferrer" data-cursor="view" data-swap>{p.link.t}</a>}
                   </div>
                 </div>
               </div>
             </article>
-            {EMULS[p.id] && <Emul e={EMULS[p.id]} />}
+            {(p.id === "flowcheck" || p.id === "flowrequest") && <EmulLoader id={p.id} />}
             {p.id === "imperio" && <Cena3D />}
             </Fragment>
           ))}

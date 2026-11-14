@@ -14,7 +14,106 @@ const latLonParaVec = (latDeg: number, lonDeg: number, r: number) => {
   );
 };
 
-/** 3 camadas de estrelas com profundidade e brilho progressivo na saída da atmosfera. */
+const GRADE_VERT = /* glsl */ `
+  uniform float uShock;
+  uniform float uShockRadius;
+  uniform vec2 uShockOrigin;
+  varying vec2 vWorldXZ;
+  varying float vRing;
+
+  void main() {
+    vec4 wp = modelMatrix * vec4(position, 1.0);
+    float d = distance(wp.xz, uShockOrigin);
+    float ring = exp(-pow((d - uShockRadius) * 0.72, 2.0)) * uShock;
+    wp.y += ring * 0.42 * sin((d - uShockRadius) * 2.8);
+    vWorldXZ = wp.xz;
+    vRing = ring;
+    gl_Position = projectionMatrix * viewMatrix * wp;
+  }
+`;
+
+const GRADE_FRAG = /* glsl */ `
+  uniform float uOpacity;
+  varying vec2 vWorldXZ;
+  varying float vRing;
+
+  void main() {
+    vec2 coord = vWorldXZ * 0.65;
+    vec2 grid = abs(fract(coord - 0.5) - 0.5) / fwidth(coord);
+    float line = min(grid.x, grid.y);
+    float mask = 1.0 - min(line, 1.0);
+
+    vec2 major = abs(fract(coord * 0.25 - 0.5) - 0.5) / fwidth(coord * 0.25);
+    float majorMask = 1.0 - min(min(major.x, major.y), 1.0);
+
+    float distFade = clamp(1.0 - length(vWorldXZ) / 26.0, 0.0, 1.0);
+    vec3 baseCol = mix(vec3(0.42, 0.56, 0.95), vec3(0.925, 0.933, 0.941), majorMask * 0.7);
+    vec3 giz = vec3(1.0, 0.824, 0.247);
+    vec3 col = mix(baseCol, giz, clamp(vRing * 1.45, 0.0, 1.0));
+    float alpha = (mask * 0.16 + majorMask * 0.22 + vRing * 0.85) * distFade * uOpacity;
+
+    if (alpha < 0.01) discard;
+    gl_FragColor = vec4(col, alpha);
+  }
+`;
+
+/** Grade de base arquitetônica com shader GLSL de onda de choque ao impacto do prumo. */
+export function GradeBaseShock() {
+  const matRef = useRef<THREE.ShaderMaterial>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const radius = useRef(0);
+
+  const uniforms = useMemo(
+    () => ({
+      uShock: { value: 0 },
+      uShockRadius: { value: 0 },
+      uShockOrigin: { value: new THREE.Vector2(3.5, 0) },
+      uOpacity: { value: 1 },
+    }),
+    [],
+  );
+
+  useFrame((_, dt0) => {
+    const m = meshRef.current;
+    const mat = matRef.current;
+    if (!m || !mat) return;
+    const vis = S.progress < 0.38 && S.quartoActive < 0.35;
+    m.visible = vis;
+    if (!vis) return;
+
+    const dt = Math.min(dt0, 0.05);
+    if (S.shockwave > 0.01) {
+      if (radius.current < 0.01) {
+        mat.uniforms.uShockOrigin.value.set(S.shockOriginX, S.shockOriginZ);
+      }
+      radius.current += dt * 16.5;
+      S.shockwave = Math.max(0, S.shockwave - dt * 1.25);
+      mat.uniforms.uShock.value = S.shockwave;
+      mat.uniforms.uShockRadius.value = radius.current;
+    } else {
+      radius.current = 0;
+      mat.uniforms.uShock.value = 0;
+    }
+
+    mat.uniforms.uOpacity.value = 1 - THREE.MathUtils.smoothstep(S.progress, 0.16, 0.36);
+  });
+
+  return (
+    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -4.4, -4]}>
+      <planeGeometry args={[48, 48, 48, 48]} />
+      <shaderMaterial
+        ref={matRef}
+        vertexShader={GRADE_VERT}
+        fragmentShader={GRADE_FRAG}
+        uniforms={uniforms}
+        transparent
+        depthWrite={false}
+      />
+    </mesh>
+  );
+}
+
+/** Pontos técnicos em 3 profundidades para percepção de velocidade Z ao atravessar a obra. */
 export function Estrelas3Camadas({ mobile }: { mobile: boolean }) {
   const refs = [useRef<THREE.Points>(null), useRef<THREE.Points>(null), useRef<THREE.Points>(null)];
   const mats = [useRef<THREE.PointsMaterial>(null), useRef<THREE.PointsMaterial>(null), useRef<THREE.PointsMaterial>(null)];
@@ -22,15 +121,15 @@ export function Estrelas3Camadas({ mobile }: { mobile: boolean }) {
   const camadas = useMemo(() => {
     const fator = mobile ? 0.5 : 1;
     const specs = [
-      { n: Math.round(320 * fator), minZ: -120, maxZ: 12, spread: 48, size: 0.08, cor: "#ECEEF0", baseOp: 0.45 },
-      { n: Math.round(220 * fator), minZ: -125, maxZ: 5, spread: 64, size: 0.13, cor: "#9eb8ff", baseOp: 0.55 },
-      { n: Math.round(90 * fator), minZ: -130, maxZ: -5, spread: 75, size: 0.2, cor: "#FFD23F", baseOp: 0.72 },
+      { n: Math.round(280 * fator), minZ: -120, maxZ: 12, spread: 46, size: 0.075, cor: "#ECEEF0", baseOp: 0.38 },
+      { n: Math.round(180 * fator), minZ: -125, maxZ: 5, spread: 60, size: 0.11, cor: "#9eb8ff", baseOp: 0.45 },
+      { n: Math.round(75 * fator), minZ: -130, maxZ: -5, spread: 70, size: 0.16, cor: "#FFD23F", baseOp: 0.65 },
     ];
     return specs.map((sp) => {
       const pos = new Float32Array(sp.n * 3);
       for (let i = 0; i < sp.n; i++) {
         pos[i * 3] = (Math.random() - 0.5) * sp.spread;
-        pos[i * 3 + 1] = (Math.random() - 0.5) * sp.spread + 18;
+        pos[i * 3 + 1] = (Math.random() - 0.5) * sp.spread + 14;
         pos[i * 3 + 2] = sp.minZ + Math.random() * (sp.maxZ - sp.minZ);
       }
       const geo = new THREE.BufferGeometry();
@@ -40,16 +139,17 @@ export function Estrelas3Camadas({ mobile }: { mobile: boolean }) {
   }, [mobile]);
 
   useFrame(({ clock }) => {
-    const fade = S.reduced ? 0.85 : THREE.MathUtils.smoothstep(S.progress, 0.06, 0.24) * (1 - S.quartoActive * 0.9);
+    const fade = S.reduced ? 0.75 : THREE.MathUtils.smoothstep(S.progress, 0.04, 0.22) * (1 - S.quartoActive * 0.9);
     const t = clock.getElapsedTime();
     camadas.forEach((c, idx) => {
       const pts = refs[idx].current;
       const mat = mats[idx].current;
       if (!pts || !mat) return;
       pts.visible = fade > 0.02;
+      if (!pts.visible) return;
       mat.opacity = c.baseOp * fade;
       if (!S.reduced) {
-        pts.rotation.z = t * (idx + 1) * 0.004 + S.px * (idx + 1) * 0.015;
+        pts.rotation.z = t * (idx + 1) * 0.003 + S.px * (idx + 1) * 0.012;
       }
     });
   });
@@ -65,124 +165,7 @@ export function Estrelas3Camadas({ mobile }: { mobile: boolean }) {
   );
 }
 
-/** Foguete low-poly feito em código + exaustão em Points dirigida por scroll e boost. */
-export function Foguete({ mobile }: { mobile: boolean }) {
-  const grupo = useRef<THREE.Group>(null);
-  const chamaRef = useRef<THREE.Mesh>(null);
-  const ptsRef = useRef<THREE.Points>(null);
-
-  const rota = useMemo(
-    () =>
-      new THREE.CatmullRomCurve3([
-        new THREE.Vector3(-5.4, -0.7, -1.8),
-        new THREE.Vector3(-3.4, 2.6, -8.5),
-        new THREE.Vector3(-1.4, 9.5, -24),
-        new THREE.Vector3(0.4, 18.0, -44),
-        new THREE.Vector3(1.8, 25.5, -62),
-      ]),
-    [],
-  );
-
-  const nPts = mobile ? 90 : 180;
-  const exaustao = useMemo(() => {
-    const pos = new Float32Array(nPts * 3);
-    const vidas = new Float32Array(nPts);
-    for (let i = 0; i < nPts; i++) {
-      vidas[i] = Math.random();
-      pos[i * 3] = (Math.random() - 0.5) * 0.28;
-      pos[i * 3 + 1] = -1.2 - vidas[i] * 3.8;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 0.28;
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    return { geo, vidas };
-  }, [nPts]);
-
-  const posTmp = useMemo(() => new THREE.Vector3(), []);
-  const tanTmp = useMemo(() => new THREE.Vector3(), []);
-  const eixoY = useMemo(() => new THREE.Vector3(0, 1, 0), []);
-  const qTmp = useMemo(() => new THREE.Quaternion(), []);
-
-  useFrame((_, dt0) => {
-    const g = grupo.current;
-    if (!g) return;
-    const vis = S.progress < 0.56 && S.quartoActive < 0.4;
-    g.visible = vis;
-    if (!vis) return;
-
-    const u = THREE.MathUtils.clamp((S.progress - 0.02) / 0.44, 0, 1);
-    rota.getPointAt(u, posTmp);
-    rota.getTangentAt(u, tanTmp);
-    g.position.copy(posTmp);
-    qTmp.setFromUnitVectors(eixoY, tanTmp.normalize());
-    g.quaternion.slerp(qTmp, S.reduced ? 1 : 0.25);
-
-    const empuxo = THREE.MathUtils.clamp(S.ignition + S.boost * 1.15 + (u > 0.02 && u < 0.95 ? 0.35 : 0.08), 0.1, 1.5);
-    if (chamaRef.current) {
-      const trem = S.reduced ? 1 : 0.85 + Math.random() * 0.3;
-      chamaRef.current.scale.set(0.75 + empuxo * 0.3, (0.4 + empuxo * 1.1) * trem, 0.75 + empuxo * 0.3);
-    }
-
-    if (ptsRef.current && !S.reduced) {
-      const dt = Math.min(dt0, 0.05);
-      const attr = exaustao.geo.attributes.position as THREE.BufferAttribute;
-      const arr = attr.array as Float32Array;
-      for (let i = 0; i < nPts; i++) {
-        exaustao.vidas[i] += dt * (1.8 + empuxo * 2.6);
-        if (exaustao.vidas[i] >= 1) {
-          exaustao.vidas[i] = 0;
-          arr[i * 3] = (Math.random() - 0.5) * 0.22;
-          arr[i * 3 + 1] = -1.15;
-          arr[i * 3 + 2] = (Math.random() - 0.5) * 0.22;
-        } else {
-          arr[i * 3] += (Math.random() - 0.5) * dt * (0.6 + empuxo);
-          arr[i * 3 + 1] -= dt * (4.5 + empuxo * 5.2);
-          arr[i * 3 + 2] += (Math.random() - 0.5) * dt * (0.6 + empuxo);
-        }
-      }
-      attr.needsUpdate = true;
-    }
-  });
-
-  return (
-    <group ref={grupo} scale={0.78}>
-      <mesh position={[0, 0.25, 0]}>
-        <cylinderGeometry args={[0.32, 0.38, 1.8, 10]} />
-        <meshStandardMaterial color="#ECEEF0" roughness={0.38} metalness={0.25} flatShading />
-      </mesh>
-      <mesh position={[0, 1.55, 0]}>
-        <coneGeometry args={[0.32, 0.85, 10]} />
-        <meshStandardMaterial color="#0F2C7A" roughness={0.35} metalness={0.4} flatShading />
-      </mesh>
-      <mesh position={[0, 0.5, 0.26]}>
-        <cylinderGeometry args={[0.11, 0.11, 0.08, 8]} />
-        <meshBasicMaterial color="#FFD23F" />
-      </mesh>
-      {[0, 1, 2, 3].map((i) => {
-        const ang = (i * Math.PI) / 2;
-        return (
-          <mesh key={i} position={[Math.sin(ang) * 0.42, -0.45, Math.cos(ang) * 0.42]} rotation={[0, ang, 0]}>
-            <boxGeometry args={[0.06, 0.62, 0.36]} />
-            <meshStandardMaterial color="#FFD23F" roughness={0.4} metalness={0.3} flatShading />
-          </mesh>
-        );
-      })}
-      <mesh position={[0, -0.78, 0]}>
-        <cylinderGeometry args={[0.24, 0.32, 0.34, 10]} />
-        <meshStandardMaterial color="#151817" roughness={0.5} metalness={0.7} flatShading />
-      </mesh>
-      <mesh ref={chamaRef} position={[0, -1.2, 0]} rotation={[Math.PI, 0, 0]}>
-        <coneGeometry args={[0.22, 0.95, 8]} />
-        <meshBasicMaterial color="#FFD23F" transparent opacity={0.92} />
-      </mesh>
-      <points ref={ptsRef} geometry={exaustao.geo}>
-        <pointsMaterial color="#FFD23F" size={0.14} sizeAttenuation transparent opacity={0.8} depthWrite={false} />
-      </points>
-    </group>
-  );
-}
-
-/** Ato 2: Globo gerado por código (0 texturas externas) com marcadores Jaú, FlowCheck e Império. */
+/** Esfera geodésica técnica com coordenadas reais de Jaú/SP e sistemas em produção. */
 export function TerraOrbita() {
   const grupo = useRef<THREE.Group>(null);
   const globo = useRef<THREE.Group>(null);
@@ -190,7 +173,7 @@ export function TerraOrbita() {
 
   const { pontosTerra, anelLinha, marcadores } = useMemo(() => {
     const R = 6.2;
-    const n = 2200;
+    const n = 1800;
     const pts: number[] = [];
     for (let i = 0; i < n; i++) {
       const phi = Math.acos(1 - (2 * (i + 0.5)) / n);
@@ -198,7 +181,6 @@ export function TerraOrbita() {
       const x = Math.sin(phi) * Math.cos(theta);
       const y = Math.cos(phi);
       const z = Math.sin(phi) * Math.sin(theta);
-      // máscara procedural determinística evocando continentes
       const onda = Math.sin(x * 3.1 + y * 2.4) * Math.cos(z * 2.8 - y * 1.7) + 0.35 * Math.sin(z * 6.0 + x * 4.5);
       if (onda > 0.08) {
         pts.push(x * (R + 0.04), y * (R + 0.04), z * (R + 0.04));
@@ -210,14 +192,13 @@ export function TerraOrbita() {
     const orbPts: THREE.Vector3[] = [];
     for (let i = 0; i <= 64; i++) {
       const a = (i / 64) * Math.PI * 2;
-      orbPts.push(new THREE.Vector3(Math.cos(a) * 8.4, Math.sin(a) * 1.6, Math.sin(a) * 8.4));
+      orbPts.push(new THREE.Vector3(Math.cos(a) * 8.4, Math.sin(a) * 1.4, Math.sin(a) * 8.4));
     }
     const anelOrbita = new THREE.BufferGeometry().setFromPoints(orbPts);
-    const anelLinha = new THREE.Line(anelOrbita, new THREE.LineBasicMaterial({ color: "#ECEEF0", transparent: true, opacity: 0.28 }));
+    const anelLinha = new THREE.Line(anelOrbita, new THREE.LineBasicMaterial({ color: "#ECEEF0", transparent: true, opacity: 0.24 }));
 
-    // Marcadores reais: Jaú/SP, FlowCheck (SP/interior), Império (Jaú/SP)
     const marcadores = [
-      { nome: "Jaú", pos: latLonParaVec(-22.3, -48.55, R + 0.14) },
+      { nome: "Jaú/SP", pos: latLonParaVec(-22.3, -48.55, R + 0.14) },
       { nome: "FlowCheck", pos: latLonParaVec(-19.5, -45.2, R + 0.14) },
       { nome: "Império", pos: latLonParaVec(-24.8, -51.4, R + 0.14) },
     ];
@@ -227,22 +208,22 @@ export function TerraOrbita() {
   useFrame(({ clock }) => {
     const g = grupo.current;
     if (!g) return;
-    const vis = S.progress > 0.3 && S.progress < 0.85 && S.quartoActive < 0.75;
+    const vis = S.progress > 0.28 && S.progress < 0.85 && S.quartoActive < 0.75;
     g.visible = vis;
     if (!vis) return;
 
-    const entrada = S.reduced ? 1 : THREE.MathUtils.smoothstep(S.progress, 0.32, 0.45);
+    const entrada = S.reduced ? 1 : THREE.MathUtils.smoothstep(S.progress, 0.3, 0.44);
     const saida = 1 - THREE.MathUtils.smoothstep(S.progress, 0.68, 0.82);
     const s = Math.max(0.001, entrada * saida * (1 - S.quartoActive * 0.5));
     g.scale.setScalar(s);
 
     if (globo.current && !S.reduced) {
-      globo.current.rotation.y = 0.75 + clock.getElapsedTime() * 0.08 + S.px * 0.18;
+      globo.current.rotation.y = 0.75 + clock.getElapsedTime() * 0.06 + S.px * 0.18;
     }
     const t = clock.getElapsedTime();
     halos.current.forEach((m, idx) => {
       if (!m) return;
-      const p = S.reduced ? 1 : 1 + 0.35 * Math.sin(t * 3 + idx * 1.4);
+      const p = S.reduced ? 1 : 1 + 0.3 * Math.sin(t * 2.8 + idx * 1.4);
       m.scale.setScalar(p);
     });
   });
@@ -251,19 +232,15 @@ export function TerraOrbita() {
     <group ref={grupo} position={[3.2, 23, -64]}>
       <group ref={globo} rotation={[0.32, 0.75, -0.15]}>
         <mesh>
-          <sphereGeometry args={[6.12, 32, 24]} />
+          <sphereGeometry args={[6.12, 28, 22]} />
           <meshBasicMaterial color="#050B1E" />
         </mesh>
         <mesh>
-          <sphereGeometry args={[6.18, 24, 16]} />
-          <meshBasicMaterial color="#0F2C7A" wireframe transparent opacity={0.42} />
-        </mesh>
-        <mesh>
-          <sphereGeometry args={[6.75, 24, 24]} />
-          <meshBasicMaterial color="#1d4ed8" transparent opacity={0.14} side={THREE.BackSide} depthWrite={false} />
+          <sphereGeometry args={[6.18, 22, 16]} />
+          <meshBasicMaterial color="#0F2C7A" wireframe transparent opacity={0.44} />
         </mesh>
         <points geometry={pontosTerra}>
-          <pointsMaterial color="#9eb8ff" size={0.13} sizeAttenuation transparent opacity={0.88} />
+          <pointsMaterial color="#9eb8ff" size={0.13} sizeAttenuation transparent opacity={0.85} />
         </points>
         {marcadores.map((mk, idx) => (
           <group key={mk.nome} position={mk.pos}>
@@ -287,7 +264,7 @@ export function TerraOrbita() {
   );
 }
 
-/** Ato 3: Constelação de 12 nós (stack real) em reentrada. */
+/** Malha estrutural de 12 nós da stack técnica no topo da obra. */
 export function ConstelacaoSkills() {
   const grupo = useRef<THREE.Group>(null);
   const { nos, linhas } = useMemo(() => {

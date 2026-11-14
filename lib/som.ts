@@ -79,3 +79,20 @@ export function tocarKonami() {
   });
 }
 
+export function tocarImpactoBase() {
+  if (!ativo) return;
+  const c = garantirCtx();
+  if (!c) return;
+  const t = c.currentTime;
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(115, t);
+  osc.frequency.exponentialRampToValueAtTime(34, t + 0.42);
+  g.gain.setValueAtTime(0.085, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.48);
+  osc.connect(g).connect(c.destination);
+  osc.start(t);
+  osc.stop(t + 0.5);
+}
+

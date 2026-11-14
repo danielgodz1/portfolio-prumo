@@ -5,8 +5,9 @@ import { Environment, Lightformer } from "@react-three/drei";
 import { EffectComposer, Noise, Vignette, ChromaticAberration } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { S } from "../lib/store";
+import { tocarImpactoBase } from "../lib/som";
 import QuartoImperio, { QUARTO_ORIGEM } from "./QuartoImperio";
-import { ConstelacaoSkills, Estrelas3Camadas, Foguete, TerraOrbita } from "./MissaoObjetos";
+import { ConstelacaoSkills, Estrelas3Camadas, GradeBaseShock, TerraOrbita } from "./MissaoObjetos";
 
 const AZUL = new THREE.Color("#0F2C7A");
 const ESPACO = new THREE.Color("#050B1E");
@@ -15,18 +16,34 @@ const GIZ = new THREE.Color("#FFD23F");
 const ANDARES = 7,
   PASSO = 7,
   Z0 = -6;
+const CABO_SEGS = 32;
 
-/** O prumo: pêndulo amortecido. O cursor, a rolagem e o duplo clique (ou P) dão impulso. */
+/** O prumo: cabo tensionado com vibração harmônica, inércia de andar e queda livre com onda de choque. */
 function Prumo() {
   const wrap = useRef<THREE.Group>(null);
   const grupo = useRef<THREE.Group>(null);
-  const fisica = useRef({ ax: 0.35, az: 0, vx: 0, vz: 0, giro: 0 });
+  const fisica = useRef({
+    ax: 0.25,
+    az: 0,
+    vx: 0,
+    vz: 0,
+    giro: 0,
+    dropOffset: 0,
+    dropVel: 0,
+    dropPhase: "idle" as "idle" | "falling" | "rebound",
+    lastAndar: 0,
+  });
+  const bobPos = useMemo(() => new THREE.Vector3(), []);
+  const topoPos = useMemo(() => new THREE.Vector3(), []);
+  const dirTmp = useMemo(() => new THREE.Vector3(), []);
+
   const { viewport } = useThree();
   const estreito = viewport.width <= 11;
   const L = estreito ? 2.3 : 3.6;
   const ancora = useMemo(() => new THREE.Vector3(0, 3.7, 0), []);
   ancora.x = estreito ? viewport.width * 0.22 : 5.2;
   ancora.y = estreito ? 4.0 : 3.7;
+
   const perfil = useMemo(
     () =>
       [
@@ -42,47 +59,138 @@ function Prumo() {
       ].map(([r, y]) => new THREE.Vector2(r, y)),
     [],
   );
-  const geoFio = useMemo(() => new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3(0, -1, 0)]), []);
-  const linhaFio = useMemo(() => new THREE.Line(geoFio, new THREE.LineBasicMaterial({ color: "#ECEEF0" })), [geoFio]);
 
-  useFrame((_, dt0) => {
+  const { linhaFio, geoFio, matFio } = useMemo(() => {
+    const pts: THREE.Vector3[] = [];
+    for (let i = 0; i <= CABO_SEGS; i++) {
+      pts.push(new THREE.Vector3(0, -i / CABO_SEGS, 0));
+    }
+    const geoFio = new THREE.BufferGeometry().setFromPoints(pts);
+    const matFio = new THREE.LineBasicMaterial({ color: "#ECEEF0" });
+    const linhaFio = new THREE.Line(geoFio, matFio);
+    return { linhaFio, geoFio, matFio };
+  }, []);
+
+  useFrame(({ clock }, dt0) => {
     const w = wrap.current;
-    if (w) w.visible = S.progress < 0.34 && S.quartoActive < 0.25;
-    if (w && !w.visible) return;
+    const visible = S.progress < 0.42 && S.quartoActive < 0.25;
+    if (w) w.visible = visible;
+    if (!visible) {
+      S.desvioGraus *= 0.9;
+      return;
+    }
 
     const f = fisica.current;
     const dt = Math.min(dt0, 0.033);
-    if (S.reduced) f.ax = estreito ? -0.12 : 0.1;
-    if (!S.reduced) {
+    const tension = THREE.MathUtils.clamp(Math.abs(S.vel) / 28, 0, 1);
+    S.wireTension = THREE.MathUtils.lerp(S.wireTension, tension, 0.18);
+
+    // Pulso de assentamento quando cruza cada andar (+3, +6, +9, +12)
+    const andarIdx = Math.floor((S.cotaMeters + 0.3) / 3);
+    if (andarIdx !== f.lastAndar && !S.reduced) {
+      const dir = andarIdx > f.lastAndar ? 1 : -1;
+      f.vz += dir * 0.48;
+      f.vx += dir * 0.22;
+      f.lastAndar = andarIdx;
+    }
+
+    // Gatilho de queda livre (duplo clique no topo)
+    if (S.dropPending && f.dropPhase === "idle") {
+      S.dropPending = false;
+      S.dropActive = true;
+      f.dropPhase = "falling";
+      f.dropVel = 1.5;
+    } else if (S.dropPending) {
+      S.dropPending = false;
+    }
+
+    if (S.reduced) {
+      f.ax = estreito ? -0.06 : 0.04;
+      f.az = 0;
+      f.dropOffset = 0;
+      f.dropPhase = "idle";
+      S.dropActive = false;
+      S.desvioGraus = 0;
+    } else {
       f.vx += S.pvx * 2.4;
       f.vz -= S.pvy * 1.5;
       S.pvx = 0;
       S.pvy = 0;
-      f.vz += S.vel * 0.0022;
+      f.vz += S.vel * 0.0032;
+      f.vx += S.vel * 0.0012;
+
       if (S.swing > 0) {
-        f.vx += 5.5 * S.swing;
-        f.vz += 2.5 * S.swing;
+        f.vx += 4.8 * S.swing;
+        f.vz += 2.2 * S.swing;
         S.swing = 0;
       }
+
       const alvoX = S.px * 0.22;
-      f.vx += (-7 * (f.ax - alvoX) - 0.85 * f.vx) * dt;
-      f.vz += (-7 * f.az - 0.85 * f.vz) * dt;
-      f.ax = THREE.MathUtils.clamp(f.ax + f.vx * dt, -1.2, 1.2);
-      f.az = THREE.MathUtils.clamp(f.az + f.vz * dt, -1.2, 1.2);
+      f.vx += (-8.8 * (f.ax - alvoX) - 1.25 * f.vx) * dt;
+      f.vz += (-8.8 * f.az - 1.25 * f.vz) * dt;
+      f.ax = THREE.MathUtils.clamp(f.ax + f.vx * dt, -1.15, 1.15);
+      f.az = THREE.MathUtils.clamp(f.az + f.vz * dt, -1.15, 1.15);
       f.giro += (Math.abs(f.vx) + Math.abs(f.vz)) * dt * 1.6 + dt * 0.25;
+
+      // Máquina de estados da queda livre até a grade de base
+      const maxDrop = Math.max(2.6, ancora.y + 3.4 - L);
+      if (f.dropPhase === "falling") {
+        f.dropVel += 38 * dt;
+        f.dropOffset += f.dropVel * dt;
+        if (f.dropOffset >= maxDrop) {
+          f.dropOffset = maxDrop;
+          f.dropPhase = "rebound";
+          f.dropVel = -8.5;
+          S.shockwave = 1.0;
+          S.shockOriginX = ancora.x + L * Math.sin(f.ax);
+          S.shockOriginZ = ancora.z + L * Math.sin(f.az);
+          tocarImpactoBase();
+        }
+      } else if (f.dropPhase === "rebound") {
+        // Recolhimento com mola amortecida
+        const force = -22 * f.dropOffset - 5.2 * f.dropVel;
+        f.dropVel += force * dt;
+        f.dropOffset += f.dropVel * dt;
+        if (Math.abs(f.dropOffset) < 0.015 && Math.abs(f.dropVel) < 0.08) {
+          f.dropOffset = 0;
+          f.dropVel = 0;
+          f.dropPhase = "idle";
+          S.dropActive = false;
+        }
+      }
+
+      const rad = Math.sqrt(f.ax * f.ax + f.az * f.az);
+      S.desvioGraus = rad * (180 / Math.PI) * 0.45;
     }
+
     const sx = Math.sin(f.ax);
     const sz = Math.sin(f.az);
     const cy = Math.sqrt(Math.max(0.05, 1 - sx * sx - sz * sz));
-    const bob = new THREE.Vector3(ancora.x + L * sx, ancora.y - L * cy, ancora.z + L * sz);
+    const effL = L + f.dropOffset;
+    bobPos.set(ancora.x + effL * sx, ancora.y - effL * cy, ancora.z + effL * sz);
+
     const g = grupo.current!;
-    g.position.copy(bob);
+    g.position.copy(bobPos);
     g.rotation.set(f.az, f.giro, -f.ax, "ZXY");
-    const topo = bob.clone().sub(ancora).normalize().multiplyScalar(-0.64).add(bob);
+
+    dirTmp.copy(bobPos).sub(ancora).normalize();
+    topoPos.copy(bobPos).addScaledVector(dirTmp, -0.64);
+
+    // Atualiza vértices do cabo com vibração harmônica proporcional à tensão do scroll
     const p = geoFio.attributes.position as THREE.BufferAttribute;
-    p.setXYZ(0, ancora.x, ancora.y, ancora.z);
-    p.setXYZ(1, topo.x, topo.y, topo.z);
+    const tClock = clock.getElapsedTime();
+    const vibAmp = S.reduced ? 0 : (S.wireTension * 0.085 + (f.dropPhase === "rebound" ? 0.04 : 0));
+    for (let i = 0; i <= CABO_SEGS; i++) {
+      const t = i / CABO_SEGS;
+      const env = Math.sin(t * Math.PI);
+      const wave = Math.sin(t * Math.PI * 3.0) * Math.sin(tClock * 36.0 + t * 6.0) * vibAmp * env;
+      const lx = THREE.MathUtils.lerp(ancora.x, topoPos.x, t) + wave;
+      const ly = THREE.MathUtils.lerp(ancora.y, topoPos.y, t);
+      const lz = THREE.MathUtils.lerp(ancora.z, topoPos.z, t) + wave * 0.5;
+      p.setXYZ(i, lx, ly, lz);
+    }
     p.needsUpdate = true;
+    matFio.color.copy(PAPEL).lerp(GIZ, Math.min(1, S.wireTension * 0.85 + (S.dropActive ? 0.9 : 0)));
   });
 
   return (
@@ -95,14 +203,14 @@ function Prumo() {
       </group>
       <primitive object={linhaFio} />
       <mesh position={ancora}>
-        <sphereGeometry args={[0.07, 12, 12]} />
-        <meshBasicMaterial color="#ECEEF0" />
+        <sphereGeometry args={[0.075, 12, 12]} />
+        <meshBasicMaterial color="#FFD23F" />
       </mesh>
     </group>
   );
 }
 
-/** A obra: andares em linhas que acompanham a saída da base; atmosfera transita de cobalto (#0F2C7A) ao espaço (#050B1E). */
+/** A obra: andares em linhas que acompanham a saída da base; atmosfera transita de cobalto (#0F2C7A) ao azul técnico profundo (#050B1E). */
 function Obra({ mobile }: { mobile: boolean }) {
   const wrap = useRef<THREE.Group>(null);
   const { scene } = useThree();
@@ -152,7 +260,7 @@ function Obra({ mobile }: { mobile: boolean }) {
   }, []);
 
   const poeira = useMemo(() => {
-    const n = mobile ? 180 : 500;
+    const n = mobile ? 140 : 380;
     const p = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) {
       p[i * 3] = (Math.random() - 0.5) * 26;
@@ -177,7 +285,8 @@ function Obra({ mobile }: { mobile: boolean }) {
   if (!scene.fog) scene.fog = new THREE.Fog(AZUL, 9, 52);
 
   useFrame(({ camera }) => {
-    if (wrap.current) wrap.current.visible = S.progress < 0.5 && S.quartoActive < 0.4;
+    const vis = S.progress < 0.52 && S.quartoActive < 0.4;
+    if (wrap.current) wrap.current.visible = vis;
     const espacoF = S.reduced ? (S.progress > 0.2 ? 1 : 0) : THREE.MathUtils.smoothstep(S.progress, 0.08, 0.34);
     bgCor.copy(AZUL).lerp(ESPACO, espacoF * (1 - S.quartoActive));
     (scene.background as THREE.Color).copy(bgCor);
@@ -187,6 +296,7 @@ function Obra({ mobile }: { mobile: boolean }) {
       scene.fog.far = 52 + espacoF * 48;
     }
 
+    if (!vis) return;
     andares.current.forEach((l, i) => {
       const dist = Math.abs(camera.position.z - (Z0 - i * PASSO));
       const quente = THREE.MathUtils.smoothstep(4.5 - dist, 0, 3.5);
@@ -204,13 +314,13 @@ function Obra({ mobile }: { mobile: boolean }) {
       ))}
       <primitive object={colLinha} />
       <points geometry={poeira}>
-        <pointsMaterial color="#ECEEF0" size={0.05} sizeAttenuation transparent opacity={0.5} depthWrite={false} />
+        <pointsMaterial color="#ECEEF0" size={0.05} sizeAttenuation transparent opacity={0.45} depthWrite={false} />
       </points>
     </group>
   );
 }
 
-/** Câmera: CatmullRomCurve3 pelo scroll + FOV kick no boost + transição suave para o Quarto da Império. */
+/** Câmera: CatmullRomCurve3 pelo scroll + FOV kick na tração + dolly-in cinematográfico no Quarto da Império. */
 function Camera() {
   const prog = useRef(0);
   const roll = useRef(0);
@@ -263,23 +373,36 @@ function Camera() {
       pMissao.x += S.px * 0.65;
       pMissao.y += S.py * 0.4;
       aMissao.x += S.px * 0.35;
+      // Micro-shake sutil quando o prumo impacta a base
+      if (S.shockwave > 0.25) {
+        const shk = (S.shockwave - 0.25) * 0.12;
+        pMissao.y += Math.sin(performance.now() * 0.08) * shk;
+      }
     }
 
     if (S.quartoActive > 0.005) {
       const qp = S.reduced ? 1 : S.quartoProgress;
-      const sub = Math.min(1, Math.max(0, qp / 0.8));
+      const sub = Math.min(1, Math.max(0, qp / 0.72));
       const ease = 1 - Math.pow(1 - sub, 3);
-      const elev = ((85 - 52 * ease) * Math.PI) / 180;
-      const az = ((-10 - 38 * ease) * Math.PI) / 180;
+      // 0.7..1.0: dolly-in cinematográfico quando os LEDs 2700K acendem
+      const dolly = Math.min(1, Math.max(0, (qp - 0.7) / 0.3));
+      const dollyEase = 1 - Math.pow(1 - dolly, 2);
+
+      const elev = ((82 - 50 * ease - 10 * dollyEase) * Math.PI) / 180;
+      const az = ((-10 - 36 * ease - 12 * dollyEase) * Math.PI) / 180;
       const camPersp = camera as THREE.PerspectiveCamera;
       const narrow = camPersp.aspect < 1;
-      const r = (narrow ? 64 : 31) - 3 * ease;
+      const r = (narrow ? 62 : 30) - 3 * ease - (narrow ? 8 : 5.5) * dollyEase;
       pQuarto.set(
         QUARTO_ORIGEM.x + Math.sin(az) * Math.cos(elev) * r,
         QUARTO_ORIGEM.y + Math.sin(elev) * r,
         QUARTO_ORIGEM.z + Math.cos(az) * Math.cos(elev) * r,
       );
-      aQuarto.set(QUARTO_ORIGEM.x + (narrow ? 0 : -3.6), QUARTO_ORIGEM.y + 0.6 * ease, QUARTO_ORIGEM.z);
+      aQuarto.set(
+        QUARTO_ORIGEM.x + (narrow ? 0 : -3.4 + 0.9 * dollyEase),
+        QUARTO_ORIGEM.y + 0.65 * ease + 0.45 * dollyEase,
+        QUARTO_ORIGEM.z,
+      );
       pMissao.lerp(pQuarto, S.quartoActive);
       aMissao.lerp(aQuarto, S.quartoActive);
     }
@@ -335,21 +458,22 @@ function Pos({ ativo }: { ativo: boolean }) {
   return (
     <EffectComposer multisampling={0}>
       <ChromaticAberration offset={off} radialModulation={false} modulationOffset={0} />
-      <Noise opacity={0.1} />
+      <Noise opacity={0.09} />
       <Vignette offset={0.3} darkness={0.62} />
     </EffectComposer>
   );
 }
 
-/** Mantém o modo reduce-motion atualizado sob demanda quando o scroll muda. */
-function ReduceUpdater() {
+/** Mantém o modo reduce-motion atualizado sob demanda quando o scroll ou toggle muda. */
+function ReduceUpdater({ reduced }: { reduced: boolean }) {
   const { invalidate } = useThree();
   useEffect(() => {
-    if (!S.reduced) return;
+    invalidate();
+    if (!reduced) return;
     const onScroll = () => invalidate();
     addEventListener("scroll", onScroll, { passive: true });
     return () => removeEventListener("scroll", onScroll);
-  }, [invalidate]);
+  }, [invalidate, reduced]);
   return null;
 }
 
@@ -357,20 +481,29 @@ export default function Scene() {
   const mobile = useMemo(() => window.matchMedia("(max-width:800px)").matches || (navigator.hardwareConcurrency || 8) <= 4, []);
   const [degradado, setDegradado] = useState(false);
   const [pausado, setPausado] = useState(false);
+  const [reduzido, setReduzido] = useState(() => S.reduced);
 
   useEffect(() => {
     const onVis = () => {
       S.paused = document.hidden;
       setPausado(document.hidden);
     };
+    const onMotion = (e: Event) => {
+      const custom = e as CustomEvent<{ reduced: boolean }>;
+      setReduzido(Boolean(custom.detail?.reduced));
+    };
     document.addEventListener("visibilitychange", onVis);
-    return () => document.removeEventListener("visibilitychange", onVis);
+    window.addEventListener("prumo:motion", onMotion);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("prumo:motion", onMotion);
+    };
   }, []);
 
   return (
     <Canvas
       dpr={mobile ? [1, 1.25] : [1, 1.75]}
-      frameloop={pausado ? "never" : S.reduced ? "demand" : "always"}
+      frameloop={pausado ? "never" : reduzido ? "demand" : "always"}
       camera={{ fov: 48, position: [0, 0.5, 9], near: 0.1, far: 160 }}
       gl={{ antialias: !mobile, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
@@ -390,19 +523,19 @@ export default function Scene() {
         <Lightformer form="rect" intensity={3} position={[-6, 1, 4]} scale={[3, 8, 1]} color="#9db4ff" />
         <Lightformer form="rect" intensity={2.2} position={[6, 0, 2]} scale={[3, 8, 1]} />
       </Environment>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[3, 6, 8]} intensity={2.5} color="#ffe9a8" />
+      <ambientLight intensity={0.55} />
+      <directionalLight position={[3, 6, 8]} intensity={2.4} color="#ffe9a8" />
       <Camera />
       <Obra mobile={mobile} />
+      <GradeBaseShock />
       <Prumo />
       <Estrelas3Camadas mobile={mobile} />
-      <Foguete mobile={mobile} />
       <TerraOrbita />
       <ConstelacaoSkills />
       <QuartoImperio />
       <QualityScaler aoDegradar={() => setDegradado(true)} />
-      <ReduceUpdater />
-      <Pos ativo={!mobile && !degradado && !S.reduced} />
+      <ReduceUpdater reduced={reduzido} />
+      <Pos ativo={!mobile && !degradado && !reduzido} />
     </Canvas>
   );
 }

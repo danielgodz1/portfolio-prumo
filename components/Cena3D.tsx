@@ -6,31 +6,44 @@ import { S } from "../lib/store";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const FASES = [
+  { id: 0, label: "01 Planta baixa", faixa: "0.0 - 0.3" },
+  { id: 1, label: "02 Extrusão 3D", faixa: "0.3 - 0.7" },
+  { id: 2, label: "03 LED 2700K", faixa: "0.7 - 1.0" },
+];
+
 /**
  * Da planta ao quarto (Império Móveis Planejados) integrado ao canvas único persistente.
- * Este componente controla apenas o estágio semântico e atualiza S.quartoActive / S.quartoProgress.
+ * Controla o estágio semântico e sincroniza S.quartoActive / S.quartoProgress.
  */
 export default function Cena3D() {
   const ref = useRef<HTMLElement>(null);
   const [semWebgl, setSemWebgl] = useState(false);
+  const [fase, setFase] = useState(0);
+  const [motionRev, setMotionRev] = useState(0);
+
+  useEffect(() => {
+    const onMotion = () => setMotionRev((v) => v + 1);
+    window.addEventListener("prumo:motion", onMotion);
+    return () => window.removeEventListener("prumo:motion", onMotion);
+  }, []);
 
   useEffect(() => {
     const sec = ref.current;
     if (!sec) return;
     if (!S.webgl) {
-      // Verifica após a pintura inicial se o canvas principal inicializou WebGL
       const t = setTimeout(() => {
         if (!S.webgl) setSemWebgl(true);
       }, 900);
       return () => clearTimeout(t);
     }
 
-    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
+    if (S.reduced) {
       const io = new IntersectionObserver(
         ([e]) => {
           S.quartoActive = e.isIntersecting ? 1 : 0;
           S.quartoProgress = 1;
+          setFase(2);
         },
         { threshold: 0.15 },
       );
@@ -47,11 +60,13 @@ export default function Cena3D() {
       end: "bottom top",
       onUpdate: (self) => {
         const p = self.progress;
-        // Entrada suave (0..0.14), palco ativo (0.14..0.86), saída suave (0.86..1)
         const entra = Math.min(1, Math.max(0, p / 0.14));
         const sai = Math.min(1, Math.max(0, (1 - p) / 0.14));
         S.quartoActive = Math.min(entra, sai);
-        S.quartoProgress = Math.min(1, Math.max(0, (p - 0.12) / 0.72));
+        const qp = Math.min(1, Math.max(0, (p - 0.12) / 0.74));
+        S.quartoProgress = qp;
+        const nextFase = qp < 0.3 ? 0 : qp < 0.7 ? 1 : 2;
+        setFase((prev) => (prev === nextFase ? prev : nextFase));
       },
       onLeave: () => {
         S.quartoActive = 0;
@@ -65,7 +80,7 @@ export default function Cena3D() {
       st.kill();
       S.quartoActive = 0;
     };
-  }, []);
+  }, [motionRev]);
 
   return (
     <section ref={ref} className={`cena3d${semWebgl ? " cena3d--fallback" : ""}`} id="quarto" aria-labelledby="c3-t">
@@ -84,9 +99,16 @@ export default function Cena3D() {
           </div>
         )}
         <div className="cena3d__texto">
-          <p className="cota">Império Móveis Planejados</p>
+          <p className="cota">Cota +9,00 m · Império Móveis Planejados</p>
           <h3 id="c3-t" className="disp">Da planta ao quarto.</h3>
-          <p className="cena3d__leg">A mesma linha vira parede, o desenho vira móvel e o LED acende por último. Esta cena é 3D de verdade, no mesmo canvas contínuo.</p>
+          <p className="cena3d__leg">A linha da planta baixa sobe em wireframe, fecha os módulos de marcenaria e acende os perfis de LED 2700K no mesmo canvas contínuo.</p>
+          <ol className="cena3d__fases cota" aria-label="Etapas da montagem 3D">
+            {FASES.map((f) => (
+              <li key={f.id} className={fase === f.id ? "ativo" : fase > f.id ? "feita" : ""}>
+                {f.label}
+              </li>
+            ))}
+          </ol>
         </div>
       </div>
     </section>
