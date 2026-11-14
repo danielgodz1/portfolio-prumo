@@ -2,27 +2,34 @@
 export const S = {
   progress: 0, // 0..1 da página
   vel: 0, // velocidade de rolagem (Lenis)
+  camara: 0, // 0..4 câmara atual
   cotaMeters: 0, // 0..15 m interpolada continuamente pelas seções
-  cotaLabel: "FUNDAÇÃO",
-  desvioGraus: 0, // desvio angular do eixo do prumo em graus
-  wireTension: 0, // 0..1 tensão/vibração harmônica no cabo do prumo
+  cotaLabel: "GLOBO ORBITAL",
+  desvioGraus: 0,
+  wireTension: 0,
   px: 0,
   py: 0, // cursor em NDC (-1..1)
   pvx: 0,
   pvy: 0, // velocidade do cursor
-  swing: 0, // impulso extra no prumo (tecla P / impulso lateral)
-  dropPending: false, // gatilho de queda livre do prumo (duplo clique no topo)
-  dropActive: false, // prumo em queda livre até a base
-  shockwave: 0, // 0..1 intensidade da onda de choque na grade de base
+  swing: 0,
+  dropPending: false,
+  dropActive: false,
+  shockwave: 0,
   shockOriginX: 0,
   shockOriginZ: 0,
-  ignition: 0, // 0..1 pulso inicial de calibração do eixo
-  boost: 0, // 0..1 intensidade de tração pela velocidade de scroll
+  ignition: 0,
+  boost: 0,
   quartoActive: 0, // 0..1 peso da transição para a cena do quarto da Império
   quartoProgress: 0, // 0..1 montagem do quarto da Império
-  konami: false, // easter egg Konami ativado
-  sound: false, // áudio opcional (desligado por padrão)
-  lowQuality: false, // ativado pelo quality scaler automático
+  naviSpin: 0, // impulso de giro 360º ao clicar na NAVI-KERNEL
+  naviBurst: 0, // 0..1 explosão de faíscas da NAVI-KERNEL
+  naviTransmit: 0, // 0..1 animação de transmissão/reverência ao enviar contato
+  naviScreenX: 0.82, // posição normalizada X na tela (0..1)
+  naviScreenY: 0.28, // posição normalizada Y na tela (0..1)
+  modo2D: false, // Acesso Rápido 2D para leitura instantânea
+  konami: false,
+  sound: false,
+  lowQuality: false,
   webgl: true,
   paused: false,
   reduced: false,

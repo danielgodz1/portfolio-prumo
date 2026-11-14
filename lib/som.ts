@@ -20,7 +20,7 @@ export function definirSom(ligado: boolean): boolean {
   ativo = ligado;
   if (ligado) {
     garantirCtx();
-    tocarPulso(520);
+    tocarNaviHey();
   }
   return ativo;
 }
@@ -96,3 +96,40 @@ export function tocarImpactoBase() {
   osc.stop(t + 0.5);
 }
 
+/** Chime cristalino estilo fada/sistema ao clicar na NAVI-KERNEL. */
+export function tocarNaviHey() {
+  if (!ativo) return;
+  const c = garantirCtx();
+  if (!c) return;
+  [880, 1174.66, 1567.98].forEach((freq, i) => {
+    const t = c.currentTime + i * 0.065;
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.032, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.24);
+    osc.connect(g).connect(c.destination);
+    osc.start(t);
+    osc.stop(t + 0.25);
+  });
+}
+
+/** Pulso de transmissão de pacote ao iniciar contato. */
+export function tocarTransmissao() {
+  if (!ativo) return;
+  const c = garantirCtx();
+  if (!c) return;
+  [440, 660, 880, 1320].forEach((freq, i) => {
+    const t = c.currentTime + i * 0.05;
+    const osc = c.createOscillator();
+    const g = c.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0.03, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    osc.connect(g).connect(c.destination);
+    osc.start(t);
+    osc.stop(t + 0.18);
+  });
+}

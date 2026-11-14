@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { S } from "../lib/store";
 
-export const QUARTO_ORIGEM = new THREE.Vector3(0, 0, -108);
+export const QUARTO_ORIGEM = new THREE.Vector3(0, 0.2, -68);
 
 const U = 40;
 const X = (px: number) => (px - 300) / U;
