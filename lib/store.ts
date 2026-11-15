@@ -3,11 +3,11 @@ export const S = {
   audiencia: "empresa" as "empresa" | "dev",
   progress: 0, // 0..1 da página
   vel: 0, // velocidade de rolagem (Lenis)
-  camara: 0, // 0..4 câmara atual
+  camara: 0, // 0..5 cota ativa (0m a +15m)
   cotaMeters: 0, // 0..15 m interpolada continuamente pelas seções
-  cotaLabel: "FUNDAÇÃO",
+  cotaLabel: "FUNDAÇÃO GLOBAL",
   desvioGraus: 0,
-  wireTension: 0,
+  wireTension: 98.4,
   px: 0,
   py: 0, // cursor em NDC (-1..1)
   pvx: 0,

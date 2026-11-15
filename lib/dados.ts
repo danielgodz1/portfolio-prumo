@@ -9,9 +9,9 @@ export const SITE = {
   empresaSubtitulo:
     "Da marcenaria ao atendimento diário: você mostra o que faz com clareza, recebe contatos prontos no WhatsApp e sai do papel e da planilha.",
   empresaProvas: [
-    "Império Móveis Planejados (Jaú/SP) no ar",
+    "Império Móveis Planejados (Jaú/SP) no ar em 1ª página do Google",
     "Sistemas FlowCheck e FlowRequest em uso diário",
-    "Demonstrações prontas para 10 ramos de negócio",
+    "13 demonstrações prontas por segmento de negócio",
   ],
 };
 
@@ -37,51 +37,61 @@ export const CAMARAS: CamaraInfo[] = [
     id: 0,
     slug: "globo",
     anchor: "#topo",
-    nome: "Câmara 00 · O Globo & A Rede",
-    curto: "00 Globo",
+    nome: "Cota +0,00 m · Fundação Global & Globo NASA",
+    curto: "+0,00 m · Globo",
     cor: "#38BDF8",
-    naviFala: "Hey! Listen! Origem travada em Jaú/SP (22°17'S, 48°33'W). Role para viajar pelo núcleo.",
-    naviSegredo: "Dica de radar: passe o mouse sobre as 2.000 partículas orbitais para gerar repulsão magnética em GLSL.",
+    naviFala: "PRUMO-NAVI online em Jaú/SP (22°17'S, 48°33'W). Acompanhe o fio de prumo e os cabos saindo da Terra.",
+    naviSegredo: "Dica do Kernel: dê dois cliques no topo ou clique em SOLTAR PRUMO no HUD para soltar o peso em queda livre!",
   },
   {
     id: 1,
-    slug: "nucleo",
-    anchor: "#camara-01",
-    nome: "Câmara 01 · Sala do Núcleo & Sistemas",
-    curto: "01 Núcleo",
-    cor: "#00FF9C",
-    naviFala: "Entrando no corredor de racks: infraestrutura real, firewall e os sistemas FlowCheck e FlowRequest.",
-    naviSegredo: "Dica do sistema: role devagar para operar o FlowCheck e o FlowRequest ao vivo, ou clique nas abas do terminal.",
+    slug: "flowcheck",
+    anchor: "#proj-flowcheck",
+    nome: "Cota +3,00 m · Engenharia de Campo (FlowCheck)",
+    curto: "+3,00 m · FlowCheck",
+    cor: "#10B981",
+    naviFala: "Andar 1 (+3,00 m): checklists operacionais de frotas e máquinas com planos de ação gerados por IA.",
+    naviSegredo: "No FlowCheck, cada laudo recebe assinatura digital, verificação RLS por usuário e plano 5W2H via IA.",
   },
   {
     id: 2,
-    slug: "imperio",
-    anchor: "#camara-02",
-    nome: "Câmara 02 · Engenharia 3D Comercial",
-    curto: "02 Império 3D",
-    cor: "#FFD27A",
-    naviFala: "Modo marcenaria 2700K: a planta baixa sobe em wireframe até acender os perfis de LED da Império.",
-    naviSegredo: "Fato real: a Império Móveis Planejados está no ar em imperiomoveisplanejadosjau.com.br com linha de lápis em 3D.",
+    slug: "flowrequest",
+    anchor: "#proj-flowrequest",
+    nome: "Cota +6,00 m · Operação & Suprimentos (FlowRequest)",
+    curto: "+6,00 m · FlowRequest",
+    cor: "#6366F1",
+    naviFala: "Andar 2 (+6,00 m): fluxo único do campo ao fornecedor, com fechamento automático em 48h no almoxarifado.",
+    naviSegredo: "Apontador, encarregado, gestor e fornecedor operam papéis isolados em tempo real com exportação em PDF e Excel.",
   },
   {
     id: 3,
-    slug: "modelos",
-    anchor: "#camara-03",
-    nome: "Câmara 03 · Portal dos 10 Modelos",
-    curto: "03 Modelos",
-    cor: "#7DD3FC",
-    naviFala: "10 cartuchos interativos de negócio: de academia a engenharia civil, cada um com física própria.",
-    naviSegredo: "Passe o cursor sobre cada cartucho para inclinar em 3D e disparar o preview da mecânica de rolagem.",
+    slug: "imperio",
+    anchor: "#camara-02",
+    nome: "Cota +9,00 m · Arquitetura 3D (Império Móveis)",
+    curto: "+9,00 m · Império 3D",
+    cor: "#D4AF37",
+    naviFala: "Andar 3 (+9,00 m): modo marcenaria 2700K — a planta a lápis se extruda em módulos até acender o LED.",
+    naviSegredo: "Caso real: imperiomoveisplanejadosjau.com.br roda em produção com configurador 3D, SEO/AEO e 1ª página local em Jaú.",
   },
   {
     id: 4,
+    slug: "modelos",
+    anchor: "#camara-03",
+    nome: "Cota +12,00 m · Showroom dos 13 Modelos",
+    curto: "+12,00 m · 13 Modelos",
+    cor: "#F8FAFC",
+    naviFala: "Andar 4 (+12,00 m): 13 sistemas comerciais completos por ramo — filtre por setor e teste no navegador.",
+    naviSegredo: "Quer ver ao vivo com o nome da sua empresa? Use o botão Testar com o nome da minha loja ao final do showroom!",
+  },
+  {
+    id: 5,
     slug: "kernel",
     anchor: "#camara-04",
-    nome: "Câmara 04 · Memory Dump & Contato",
-    curto: "04 Kernel",
-    cor: "#FFD23F",
-    naviFala: "Setor 0x00401000: código, infraestrutura, hardware e engenharia reversa reunidos antes da transmissão.",
-    naviSegredo: "Ative o áudio ou clique em qualquer canal de contato abaixo para enviar o pacote de transmissão!",
+    nome: "Cota +15,00 m · O Núcleo / Kernel Room & Contato",
+    curto: "+15,00 m · Kernel",
+    cor: "#EAB308",
+    naviFala: "Cota +15,00 m (Núcleo): servidores Windows AD, Hyper-V, MikroTik, Wazuh, hardware e engenharia reversa.",
+    naviSegredo: "Achou o registrador 0x00401000? Abra o Inspetor Hexadecimal e digite zelda, stack ou prumo!",
   },
 ];
 
@@ -208,40 +218,73 @@ export const PROJETOS: Projeto[] = [
       ["Tecnologia", "React, TypeScript, Three.js, GSAP, Lenis, Zustand"],
     ],
     links: [
-      { t: "Visitar site ao vivo ↗", u: "https://www.imperiomoveisplanejadosjau.com.br/" },
-      { t: "Instagram da Império ↗", u: "https://www.instagram.com/imperio.moveis.jau/" },
+      { t: "Abrir site e configurador 3D em produção", u: "https://www.imperiomoveisplanejadosjau.com.br/" },
+      { t: "Instagram da Império", u: "https://www.instagram.com/imperio.moveis.jau/" },
     ],
   },
 ];
 
 const BASE = "https://portfolio-programacao1.vercel.app/modelos/";
+export type SetorModelo =
+  | "Gastronomia & Delivery"
+  | "Moda & Beleza"
+  | "Engenharia & Indústria"
+  | "Serviços";
+
 export type Modelo = {
   slug: string;
   nome: string;
   conceito: string;
   mecanica: string;
+  setor: SetorModelo;
   url: string;
 };
 
-export const MODELOS: Modelo[] = [
-  ["academia", "Academia", "A rolagem carrega a barra; treinos como repetições.", "FÍSICA DE BARRA NO SCROLL"],
-  ["roupas", "Roupas", "Arara que balança com a rolagem e provador de cores.", "PROVADOR DE CORES"],
-  ["perfumes", "Perfumes", "A rolagem é o tempo do perfume na pele.", "PIRÂMIDE OLFATIVA NO TEMPO"],
-  ["beleza", "Beleza", "Olho real ganha cílios na rolagem; agenda e sacola.", "CAMADAS & AGENDA AO VIVO"],
-  ["restaurante", "Restaurante", "O prato se monta em camadas; cardápio e reserva.", "MONTAGEM EM CAMADAS"],
-  ["hamburgueria", "Hamburgueria", "Lanche que se monta e pedido pelo WhatsApp.", "MONTAGEM & PEDIDO WHATSAPP"],
-  ["pizzaria", "Pizzaria", "Pizza que se monta e pedido pelo WhatsApp.", "FATIAS & MONTE A PIZZA"],
-  ["arquitetura", "Arquitetura", "A casa se constrói na rolagem; maquete 3D.", "MAQUETE 3D NA ROLAGEM"],
-  ["marcenaria", "Marcenaria", "Armário 3D que abre em peças e vira orçamento.", "EXPLODED VIEW 3D"],
-  ["engenharia", "Engenharia", "Prédio que sobe andar por andar; quantitativo ao vivo.", "QUANTITATIVO AO VIVO"],
-].map(([slug, nome, conceito, mecanica]) => ({ slug, nome, conceito, mecanica, url: BASE + slug + "/" }));
+export const MODELOS: Modelo[] = (
+  [
+    ["academia", "Academia", "Barra olímpica que soma peso na rolagem + aula experimental no WhatsApp.", "FÍSICA DE BARRA NO SCROLL", "Serviços"],
+    ["roupas", "Roupas", "Arara com física de balanço na rolagem + provador de cores ao vivo.", "PROVADOR DE CORES", "Moda & Beleza"],
+    ["perfumes", "Perfumes", "Pirâmide olfativa no tempo da rolagem (saída, coração e fundo) + névoa.", "PIRÂMIDE OLFATIVA NO TEMPO", "Moda & Beleza"],
+    ["beleza", "Beleza & Cílios", "Olho real que ganha extensão de cílios no scroll + agenda e editor sem código.", "CAMADAS & AGENDA AO VIVO", "Moda & Beleza"],
+    ["restaurante", "Restaurante", "Brasas vivas e prato montado em camadas + reserva de mesa pelo WhatsApp.", "MONTAGEM EM CAMADAS", "Gastronomia & Delivery"],
+    ["hamburgueria", "Hamburgueria", "Burger que se monta peça a peça no scroll + montador de pedido no WhatsApp.", "MONTAGEM & PEDIDO WHATSAPP", "Gastronomia & Delivery"],
+    ["pizzaria", "Pizzaria", "Pizza saindo do forno com queijo esticando + montador meio a meio.", "FATIAS & MEIO A MEIO", "Gastronomia & Delivery"],
+    ["arquitetura", "Arquitetura", "Casa que sobe do terreno à entrega + maquete 3D fachada, corte e planta.", "MAQUETE 3D NA ROLAGEM", "Engenharia & Indústria"],
+    ["marcenaria", "Marcenaria", "Armário 3D em visão explodida + lista de corte e cálculo de orçamento ao vivo.", "EXPLODED VIEW 3D", "Engenharia & Indústria"],
+    ["engenharia", "Engenharia Civil", "Prédio 3D andar por andar + simulador de quantitativo e cronograma ao vivo.", "QUANTITATIVO AO VIVO", "Engenharia & Indústria"],
+    ["metalurgica", "Metalúrgica", "Linha de produção 3D (corte a plasma, dobra, solda) + cálculo de peça por peso.", "LINHA INDUSTRIAL 3D", "Engenharia & Indústria"],
+    ["empresa", "Empresa em Geral", "Monólito 3D modular com a inicial da marca + editor sem código ao vivo.", "MONÓLITO & EDITOR AO VIVO", "Serviços"],
+    ["calcados", "Calçados", "Sapato em visão explodida (cabedal, palmilha, solado) + configurador Monte seu Par.", "MONTE SEU PAR 3D", "Moda & Beleza"],
+  ] as [string, string, string, string, SetorModelo][]
+).map(([slug, nome, conceito, mecanica, setor]) => ({ slug, nome, conceito, mecanica, setor, url: BASE + slug + "/" }));
+
+export const PILARES_KERNEL = [
+  {
+    codigo: "01 // FRONT & 3D",
+    titulo: "Front-End & Experiência 3D",
+    resumo: "Interfaces rápidas e interativas no navegador, com movimento só onde ajuda a vender ou operar.",
+    itens: ["React 19", "Next.js", "TypeScript", "Vite", "Tailwind CSS", "Three.js / R3F", "GSAP", "Lenis"],
+  },
+  {
+    codigo: "02 // BACK & IA",
+    titulo: "Back-End, Dados & Automação com IA",
+    resumo: "Sistemas multiperfil com banco relacional, segurança por linha e automações de fluxo.",
+    itens: ["Node.js", "Express", "Supabase (PostgreSQL + RLS)", "ERP TOTVS RM", "n8n", "APIs de IA (Groq / LLMs)"],
+  },
+  {
+    codigo: "03 // INFRA & SEC",
+    titulo: "Infraestrutura Crítica, Redes & Cibersegurança",
+    resumo: "Sustentação completa de servidores, redes entre unidades, failover e monitoramento 24h.",
+    itens: ["Windows Server", "Active Directory & GPOs", "Hyper-V Replica", "MikroTik RouterOS", "UniFi", "Zabbix", "Wazuh SIEM", "Sysmon", "Bitdefender GravityZone"],
+  },
+];
 
 export const KERNEL_DUMP = [
-  { addr: "0x00401000", hex: "4A 41 55 2D 53 50 00 01", label: "ORIGIN", desc: "Daniel dos Santos · Jaú, SP · Do briefing ao deploy em produção." },
-  { addr: "0x00401018", hex: "52 45 41 43 54 31 39 2B", label: "WEB_CORE", desc: "React 19, Next.js, Node, Supabase e TypeScript para sistemas corporativos reais." },
-  { addr: "0x00401030", hex: "57 45 42 47 4C 5F 33 44", label: "SHADER_GLSL", desc: "Three.js, R3F, shaders customizados e GSAP quando a narrativa pede profundidade." },
-  { addr: "0x00401048", hex: "4E 45 54 5F 53 45 43 00", label: "INFRA_SEC", desc: "Windows Server, Active Directory, Hyper-V Replica, MikroTik, Wazuh, Zabbix e TOTVS RM." },
-  { addr: "0x00401060", hex: "5A 45 4C 44 41 5F 52 45", label: "HARDWARE_RE", desc: "Hardware, arquitetura de baixo nível e engenharia reversa / decompilação de games." },
+  { addr: "0x00401000", hex: "4A 41 55 2D 53 50 00 01", label: "ORIGIN", desc: "Daniel dos Santos · Jaú, SP · Do servidor local ao WebGL 3D em produção." },
+  { addr: "0x00401018", hex: "52 45 41 43 54 31 39 2B", label: "WEB_CORE", desc: "React 19, Next.js, Node, Supabase RLS, n8n e IA Groq para sistemas corporativos reais." },
+  { addr: "0x00401030", hex: "57 45 42 47 4C 5F 33 44", label: "SHADER_GLSL", desc: "Three.js, R3F, shaders customizados GLSL, GSAP e física de mola no Prumo." },
+  { addr: "0x00401048", hex: "4E 45 54 5F 53 45 43 00", label: "INFRA_SEC", desc: "Windows Server, AD, Hyper-V Replica, MikroTik, UniFi, Zabbix, Wazuh, Sysmon e Bitdefender." },
+  { addr: "0x00401060", hex: "5A 45 4C 44 41 5F 52 45", label: "HARDWARE_RE", desc: "i5-14600KF / RTX 5060 Ti · Hardware, baixo nível e engenharia reversa / decompilação estilo Zelda." },
 ];
 
 export const STACK = [
@@ -249,14 +292,14 @@ export const STACK = [
   "Next.js",
   "Three.js",
   "Node.js",
-  "Supabase",
+  "Supabase RLS",
   "TOTVS RM",
   "MikroTik",
-  "Wazuh",
+  "Wazuh SIEM",
   "Zabbix",
   "Windows Server",
   "Hyper-V",
-  "Reverse Engineering",
+  "Engenharia Reversa",
 ];
 
 export const FAQ_JAU = [
@@ -273,7 +316,7 @@ export const FAQ_JAU = [
   {
     pergunta: "Posso ver uma ideia parecida com o meu ramo antes de fechar?",
     resposta:
-      "Sim. Tenho 10 demonstrações prontas (academia, roupas, perfumes, beleza, restaurante, hamburgueria, pizzaria, arquitetura, marcenaria e engenharia) além do site real da Império Móveis Planejados em Jaú.",
+      "Sim. Tenho 13 demonstrações prontas (academia, roupas, perfumes, beleza, restaurante, hamburgueria, pizzaria, arquitetura, marcenaria, engenharia, metalúrgica, empresa e calçados) além do site real da Império Móveis Planejados em Jaú.",
   },
   {
     pergunta: "Como o cliente entra em contato comigo pelo site?",

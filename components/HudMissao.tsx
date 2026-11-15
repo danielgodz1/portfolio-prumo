@@ -3,13 +3,18 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { S } from "../lib/store";
 import { definirSom, lerSomPreferencia, tocarIgnicao } from "../lib/som";
 
-/** Barra minimalista de telemetria planetária, cota e acessibilidade (movimento e som). */
+/** HUD tático de engenharia: Cota (+0,00 a +15,00 m), Tração Lenis, Tensão do Cabo e Prumo. */
 export default function HudMissao() {
   const [som, setSom] = useState(false);
   const [reduzido, setReduzido] = useState(false);
   const [oculto, setOculto] = useState(false);
   const planetaRef = useRef({ idx: 0, nome: "Terra · Jaú/SP" });
-  const [cotaTexto, setCotaTexto] = useState("+0,00 m · PLANETA 01/08 · TERRA · JAÚ/SP");
+  const [telemetria, setTelemetria] = useState({
+    cota: "+0,00 m · FUNDAÇÃO GLOBAL",
+    tracao: "0.0 m/s",
+    tensao: "98.4 N",
+    status: "PLANETA 01/08 · TERRA · JAÚ/SP",
+  });
   const [cotaAnuncio, setCotaAnuncio] = useState("");
 
   useEffect(() => {
@@ -43,10 +48,17 @@ export default function HudMissao() {
     window.addEventListener("prumo:som", onSomEvent);
 
     const id = window.setInterval(() => {
-      const m = S.cotaMeters;
+      const cotaFmt = `+${S.cotaMeters.toFixed(2).replace(".", ",")} m · ${S.cotaLabel}`;
+      const velFmt = `${Math.abs(S.vel).toFixed(1)} m/s`;
+      const tensaoFmt = `${S.wireTension.toFixed(1)} N`;
       const numStr = String(planetaRef.current.idx + 1).padStart(2, "0");
-      const next = `+${m.toFixed(2).replace(".", ",")} m · PLANETA ${numStr}/08 · ${planetaRef.current.nome.toUpperCase()}`;
-      setCotaTexto((prev) => (prev === next ? prev : next));
+      const statusFmt = `PLANETA ${numStr}/08 · ${planetaRef.current.nome.toUpperCase()}`;
+
+      setTelemetria((prev) =>
+        prev.cota === cotaFmt && prev.tracao === velFmt && prev.tensao === tensaoFmt && prev.status === statusFmt
+          ? prev
+          : { cota: cotaFmt, tracao: velFmt, tensao: tensaoFmt, status: statusFmt },
+      );
     }, 110);
 
     const ct = document.querySelector("#contato");
@@ -88,15 +100,30 @@ export default function HudMissao() {
     window.dispatchEvent(new CustomEvent("prumo:motion", { detail: { reduced: proxReduzido } }));
   }, [reduzido]);
 
+  const soltarPrumo = useCallback(() => {
+    window.dispatchEvent(new CustomEvent("prumo:soltar-peso"));
+  }, []);
+
   return (
-    <aside className={`hud-min cota${oculto ? " is-oculto" : ""}`} aria-label="Telemetria espacial, cota e acessibilidade">
-      <span className="hud-min__cota" aria-live="off">
-        {cotaTexto}
-      </span>
+    <aside className={`hud-min cota${oculto ? " is-oculto" : ""}`} aria-label="Telemetria de engenharia, cota e acessibilidade">
+      <div className="hud-min__dados" aria-live="off">
+        <span className="hud-min__cota">COTA ATUAL: {telemetria.cota}</span>
+        <span className="hud-min__sep">TRAÇÃO_SCROLL: {telemetria.tracao}</span>
+        <span className="hud-min__sep">TENSÃO_CABO: {telemetria.tensao}</span>
+        <span className="hud-min__sep hud-min__status">{telemetria.status}</span>
+      </div>
       <span className="sr-only" role="status" aria-live="polite">
         {cotaAnuncio}
       </span>
       <div className="hud-min__ctrls">
+        <button
+          type="button"
+          className="hud-min__btn hud-min__btn--prumo"
+          onClick={soltarPrumo}
+          aria-label="Soltar o peso do prumo em queda livre no mundo 3D"
+        >
+          Soltar Prumo
+        </button>
         <button
           type="button"
           className="hud-min__btn"
@@ -111,7 +138,7 @@ export default function HudMissao() {
           className="hud-min__btn"
           onClick={alternarSom}
           aria-pressed={som}
-          aria-label={som ? "Silenciar áudio espacial e propulsão" : "Ativar áudio espacial e som do foguete"}
+          aria-label={som ? "Silenciar áudio espacial e cliques por cota" : "Ativar áudio espacial e cliques por cota"}
         >
           {som ? "Som: On" : "Som: Off"}
         </button>

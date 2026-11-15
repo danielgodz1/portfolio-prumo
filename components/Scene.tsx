@@ -6,33 +6,63 @@ import { Environment, Lightformer } from "@react-three/drei";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { S } from "../lib/store";
+import { tocarImpactoBase } from "../lib/som";
 import QuartoImperio, { QUARTO_ORIGEM } from "./QuartoImperio";
 import SistemaSolar from "./mundo/SistemaSolar";
 import FogueteEspacial from "./mundo/FogueteEspacial";
 import CabosRedeEspacial from "./mundo/CabosRedeEspacial";
+import MascoteIA from "./mundo/MascoteIA";
 
 const GradeShockShader = dynamic(() => import("./GradeShockShader"), { ssr: false });
 
-/** Fio e peso de prumo 3D com física de mola acoplada à velocidade da rolagem (assinatura O Prumo no Hero). */
+/** Fio e peso de prumo 3D com física de mola + queda livre (2x clique / HUD) acoplada à rolagem. */
 function PrumoPendulo() {
   const grp = useRef<THREE.Group>(null);
+  const pesoRef = useRef<THREE.Mesh>(null);
   const ang = useRef(0);
   const velAng = useRef(0);
+  const dropY = useRef(0);
+  const dropVel = useRef(0);
 
   useFrame((_, dt0) => {
     const g = grp.current;
     if (!g) return;
-    const vis = S.progress < 0.24;
+    const vis = S.progress < 0.24 || S.dropActive;
     g.visible = vis;
     if (!vis || S.reduced) {
-      if (g) g.rotation.z = 0;
+      g.rotation.z = 0;
       return;
     }
     const dt = Math.min(dt0, 0.04);
-    const force = -16 * ang.current - 3.6 * velAng.current + THREE.MathUtils.clamp(S.vel * 0.018 + S.px * 1.4, -4, 4);
+    const force = -16 * ang.current - 3.6 * velAng.current + THREE.MathUtils.clamp(S.vel * 0.018 + S.px * 1.4 + S.swing * 3, -5, 5);
+    S.swing *= 0.9;
     velAng.current += force * dt;
     ang.current += velAng.current * dt;
     g.rotation.z = THREE.MathUtils.clamp(ang.current, -0.35, 0.35);
+
+    if (S.dropPending) {
+      S.dropPending = false;
+      S.dropActive = true;
+      dropVel.current = -11;
+    }
+    if (S.dropActive && pesoRef.current) {
+      dropVel.current += -18 * dt;
+      dropY.current += dropVel.current * dt;
+      if (dropY.current <= -3.2) {
+        dropY.current = -3.2;
+        dropVel.current = Math.abs(dropVel.current) * 0.42;
+        S.shockwave = 1;
+        tocarImpactoBase();
+        if (Math.abs(dropVel.current) < 1.2) {
+          S.dropActive = false;
+          dropVel.current = 0;
+        }
+      }
+      pesoRef.current.position.y = -4.35 + dropY.current * 0.35;
+    } else if (pesoRef.current && dropY.current < -0.01) {
+      dropY.current = THREE.MathUtils.lerp(dropY.current, 0, 0.08);
+      pesoRef.current.position.y = -4.35 + dropY.current * 0.35;
+    }
   });
 
   return (
@@ -41,9 +71,9 @@ function PrumoPendulo() {
         <cylinderGeometry args={[0.01, 0.01, 4.2, 6]} />
         <meshBasicMaterial color="#7DD3FC" transparent opacity={0.55} />
       </mesh>
-      <mesh position={[0, -4.35, 0]} rotation={[Math.PI, 0, 0]}>
+      <mesh ref={pesoRef} position={[0, -4.35, 0]} rotation={[Math.PI, 0, 0]}>
         <coneGeometry args={[0.24, 0.62, 6]} />
-        <meshStandardMaterial color="#FFD23F" emissive="#FFB800" emissiveIntensity={0.4} metalness={0.85} roughness={0.25} />
+        <meshStandardMaterial color="#FFD23F" emissive="#FFB800" emissiveIntensity={0.45} metalness={0.85} roughness={0.25} />
       </mesh>
     </group>
   );
@@ -301,10 +331,10 @@ export default function Scene() {
 
   return (
     <Canvas
-      aria-label="Mundo 3D contínuo com os 8 planetas do Sistema Solar em texturas reais da NASA, foguete espacial e maquete da Império"
+      aria-label="Mundo 3D contínuo com Globo NASA 2K, Cabos de Fibra, Prumo, Mascote PRUMO-NAVI, 8 Planetas e Império 3D"
       eventSource={evSource}
       eventPrefix="client"
-      dpr={mobile || softGpu ? [1, 1.2] : [1, 1.65]}
+      dpr={softGpu ? [1, 1.2] : [1, 1.5]}
       frameloop={pausado ? "never" : reduzido ? "demand" : "always"}
       camera={{ fov: 48, position: [0.35, 0.28, 6.8], near: 0.1, far: 340 }}
       gl={{ antialias: !mobile && !softGpu, powerPreference: "high-performance" }}
@@ -341,6 +371,7 @@ export default function Scene() {
 
       <CameraMundo />
       <PrumoPendulo />
+      <MascoteIA />
       <Suspense fallback={null}>
         <SistemaSolar />
         <CabosRedeEspacial />

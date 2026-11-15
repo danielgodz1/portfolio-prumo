@@ -36,11 +36,12 @@ export default function Experience() {
     } catch {
       pref = null;
     }
-    const reduced = pref ? pref === "reduzido" : matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // Regra Windows/UX: WebGL e animações permanecem ativos por padrão; só reduz se o usuário ativou explicitamente no HUD.
+    const reduced = pref === "reduzido";
     S.reduced = reduced;
     html.classList.toggle("reduzir", reduced);
     html.classList.toggle("js", !reduced);
-    html.classList.toggle("movimento-forcado", !reduced && pref === "ativo");
+    html.classList.toggle("movimento-forcado", !reduced);
 
     // Economia automática em celular simples ou conexão com economia de dados
     const nav = navigator as Navigator & {
@@ -62,11 +63,24 @@ export default function Experience() {
 
     let ultimoDegrau = 0;
     const atualizarCota = (p: number) => {
-      const metros = Math.round(clamp(p, 0, 1) * 12 * 100) / 100;
+      const metros = Math.round(clamp(p, 0, 1) * 15 * 100) / 100;
       S.cotaMeters = metros;
-      const degrau = metros >= 9 ? 9 : metros >= 6 ? 6 : metros >= 3 ? 3 : 0;
+      S.wireTension = Math.round((98.4 + Math.min(28.0, Math.abs(S.vel) * 1.35)) * 10) / 10;
+      const degrau =
+        metros >= 14.2 ? 15 : metros >= 11.2 ? 12 : metros >= 8.2 ? 9 : metros >= 5.2 ? 6 : metros >= 2.4 ? 3 : 0;
+      S.camara = degrau / 3;
       S.cotaLabel =
-        degrau === 9 ? "IMPÉRIO 3D" : degrau === 6 ? "SISTEMAS" : degrau === 3 ? "FUNDAÇÃO" : "NÍVEL +0,00 m";
+        degrau === 15
+          ? "KERNEL ROOM"
+          : degrau === 12
+            ? "13 MODELOS"
+            : degrau === 9
+              ? "IMPÉRIO 3D"
+              : degrau === 6
+                ? "FLOWREQUEST"
+                : degrau === 3
+                  ? "FLOWCHECK"
+                  : "FUNDAÇÃO GLOBAL";
       if (degrau !== ultimoDegrau) {
         ultimoDegrau = degrau;
         if (degrau > 0) tocarCliqueCota(degrau);
@@ -117,8 +131,10 @@ export default function Experience() {
         kIdx = k === KONAMI[0] ? 1 : 0;
       }
     };
+    const onSoltarPeso = () => soltar();
     addEventListener("dblclick", dbl);
     addEventListener("keydown", tecla);
+    window.addEventListener("prumo:soltar-peso", onSoltarPeso);
 
     const contadores = $("[data-conta]");
     if (reduced) {
@@ -365,6 +381,7 @@ export default function Experience() {
       removeEventListener("pointermove", onMove);
       removeEventListener("dblclick", dbl);
       removeEventListener("keydown", tecla);
+      window.removeEventListener("prumo:soltar-peso", onSoltarPeso);
     };
   }, [motionRev]);
   return null;
