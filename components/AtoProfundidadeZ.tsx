@@ -44,7 +44,6 @@ export default function AtoProfundidadeZ({ id, ato, titulo, subtitulo, children,
     if (S.reduced || S.modo2D) {
       cam.style.transform = "";
       cam.style.opacity = "1";
-      cam.style.filter = "";
       return;
     }
 
@@ -52,31 +51,27 @@ export default function AtoProfundidadeZ({ id, ato, titulo, subtitulo, children,
       trigger: sec,
       start: "top bottom",
       end: "bottom top",
-      scrub: 0.45,
+      scrub: 0.35,
       onUpdate: (self) => {
-        const p = self.progress; // 0 = entra embaixo, 0.5 = foco absoluto, 1 = atravessa a câmera
+        const p = self.progress;
         let z = 0;
         let s = 1;
         let op = 1;
-        let blur = 0;
 
-        if (p < 0.34) {
-          const k = 1 - Math.min(1, p / 0.34);
-          z = -680 * k;
-          s = 1 - 0.36 * k;
-          op = Math.max(0.06, 1 - k * 0.94);
-          blur = 8 * k;
-        } else if (p > 0.7) {
-          const k = Math.min(1, (p - 0.7) / 0.3);
-          z = 260 * k;
-          s = 1 + 0.28 * k;
+        if (p < 0.32) {
+          const k = 1 - Math.min(1, p / 0.32);
+          z = -460 * k;
+          s = 1 - 0.28 * k;
+          op = Math.max(0.08, 1 - k * 0.92);
+        } else if (p > 0.72) {
+          const k = Math.min(1, (p - 0.72) / 0.28);
+          z = 200 * k;
+          s = 1 + 0.2 * k;
           op = Math.max(0, 1 - k * 1.15);
-          blur = 6 * k;
         }
 
         cam.style.transform = `perspective(1200px) translate3d(0, 0, ${z.toFixed(1)}px) scale(${s.toFixed(3)})`;
         cam.style.opacity = op.toFixed(3);
-        cam.style.filter = blur > 0.25 ? `blur(${blur.toFixed(1)}px)` : "none";
       },
     });
 

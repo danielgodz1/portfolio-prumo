@@ -110,9 +110,16 @@ test.describe("portfolio-prumo — Awwwards Scrollytelling Z, Empresas, Devs & S
     await page.waitForTimeout(350);
     await expect(page.locator("#camara-03 .mod-card:not(.mod-card--cta)")).toHaveCount(13);
     await expect(page.locator("#camara-03 .mod-card__acao").first()).toContainText("Abrir demonstração");
+    // Confirma que todos os 13 cards (inclusive o 13º Calçados) rolam no carrossel e abrem em grade
+    const ultimoCard = page.locator("#camara-03 .mod-card:not(.mod-card--cta)").last();
+    await ultimoCard.scrollIntoViewIfNeeded();
+    await expect(ultimoCard).toBeVisible();
+    await page.getByRole("button", { name: "Ver todos (13)" }).click();
+    await expect(page.locator("#camara-03 .modelos-trilha")).toHaveClass(/is-grade/);
+    await page.getByRole("button", { name: "Modo carrossel" }).click();
     await page.getByRole("button", { name: "Gastronomia & Delivery" }).click();
     await expect(page.locator("#camara-03 .mod-card:not(.mod-card--cta)")).toHaveCount(3);
-    await page.getByRole("button", { name: "Todos" }).click();
+    await page.getByRole("button", { name: "Todos", exact: true }).click();
     await expect(page.locator("#camara-03 .mod-card:not(.mod-card--cta)")).toHaveCount(13);
     await shot(page, "04-modelos.png");
 

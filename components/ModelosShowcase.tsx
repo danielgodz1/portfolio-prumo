@@ -1,13 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MODELOS, type SetorModelo } from "../lib/dados";
 import { MODELOS_BASE_URL, MODELO_CUSTOM_ATIVO } from "../lib/site";
 import { S } from "../lib/store";
 import CtaWhatsApp from "./CtaWhatsApp";
-
-gsap.registerPlugin(ScrollTrigger);
 
 /** Preview vetorial exclusivo por modelo, ativado no hover/foco do card. */
 function MicroPreview({ slug }: { slug: string }) {
@@ -146,13 +142,18 @@ const SETORES: ("Todos" | SetorModelo)[] = [
 ];
 
 export default function ModelosShowcase() {
-  const secRef = useRef<HTMLElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<{ ativo: boolean; startX: number; scrollLeft: number; moveu: boolean }>({
+    ativo: false,
+    startX: 0,
+    scrollLeft: 0,
+    moveu: false,
+  });
   const [setorAtivo, setSetorAtivo] = useState<"Todos" | SetorModelo>("Todos");
+  const [modoGrade, setModoGrade] = useState(false);
   const [ativoIdx, setAtivoIdx] = useState(0);
   const [progPct, setProgPct] = useState(0);
-  const [motionRev, setMotionRev] = useState(0);
   const [empNome, setEmpNome] = useState("");
   const [empCor, setEmpCor] = useState("#0F2C7A");
   const [empWhats, setEmpWhats] = useState("");
@@ -161,102 +162,60 @@ export default function ModelosShowcase() {
   const modelosVisiveis = setorAtivo === "Todos" ? MODELOS : MODELOS.filter((m) => m.setor === setorAtivo);
 
   useEffect(() => {
-    const onMotion = () => setMotionRev((v) => v + 1);
-    const onModo2D = () => setMotionRev((v) => v + 1);
-    window.addEventListener("prumo:motion", onMotion);
-    window.addEventListener("prumo:modo2d", onModo2D);
-    return () => {
-      window.removeEventListener("prumo:motion", onMotion);
-      window.removeEventListener("prumo:modo2d", onModo2D);
-    };
-  }, []);
-
-  useEffect(() => {
-    const sec = secRef.current;
     const vp = viewportRef.current;
-    const track = trackRef.current;
-    if (!sec || !vp || !track) return;
-
-    const isDesktop = () => window.innerWidth >= 900 && !S.modo2D;
+    if (vp) vp.scrollLeft = 0;
     setAtivoIdx(0);
     setProgPct(0);
+  }, [setorAtivo, modoGrade]);
 
-    if (S.reduced || !isDesktop()) {
-      track.style.transform = "";
-      sec.style.height = "";
-      return;
-    }
-
-    const totalCards = modelosVisiveis.length + 1;
-    const setup = () => {
-      const dist = Math.max(0, track.scrollWidth - vp.clientWidth);
-      sec.style.height = `${Math.max(150, Math.round((dist / window.innerHeight) * 100 + 115))}vh`;
-      return dist;
-    };
-
-    let dist = setup();
-    let skewNow = 0;
-
-    const st = ScrollTrigger.create({
-      trigger: sec,
-      start: "top top",
-      end: "bottom bottom",
-      scrub: 0.45,
-      invalidateOnRefresh: true,
-      onRefresh: () => {
-        dist = setup();
-      },
-      onUpdate: (self) => {
-        const x = -dist * self.progress;
-        const targetSkew = Math.max(-5, Math.min(5, S.vel * -0.16));
-        skewNow += (targetSkew - skewNow) * 0.25;
-        track.style.transform = `translate3d(${x.toFixed(1)}px, 0, 0) skewX(${skewNow.toFixed(2)}deg)`;
-        const idx = Math.min(totalCards - 1, Math.floor(self.progress * totalCards));
-        setAtivoIdx((prev) => (prev === idx ? prev : idx));
-        setProgPct(Math.round(self.progress * 100));
-      },
-    });
-
-    const onResize = () => {
-      if (!isDesktop()) {
-        st.disable();
-        track.style.transform = "";
-        sec.style.height = "";
-      } else {
-        st.enable();
-        ScrollTrigger.refresh();
-      }
-    };
-    window.addEventListener("resize", onResize);
-    ScrollTrigger.refresh();
-
-    return () => {
-      window.removeEventListener("resize", onResize);
-      st.kill();
-      track.style.transform = "";
-      sec.style.height = "";
-    };
-  }, [motionRev, modelosVisiveis.length, setorAtivo]);
+  const atualizarProgresso = () => {
+    const vp = viewportRef.current;
+    if (!vp) return;
+    const max = Math.max(1, vp.scrollWidth - vp.clientWidth);
+    const pct = Math.round((vp.scrollLeft / max) * 100);
+    const total = modelosVisiveis.length;
+    const idx = Math.min(total - 1, Math.floor((vp.scrollLeft / max) * total));
+    setProgPct(Math.max(0, Math.min(100, pct)));
+    setAtivoIdx((prev) => (prev === idx ? prev : idx));
+  };
 
   const irParaCard = (delta: number) => {
     const vp = viewportRef.current;
-    const sec = secRef.current;
+    if (!vp) return;
     const total = modelosVisiveis.length + 1;
     const alvo = Math.max(0, Math.min(total - 1, ativoIdx + delta));
     setAtivoIdx(alvo);
+    const cards = vp.querySelectorAll<HTMLElement>(".mod-card");
+    const targetCard = cards[alvo];
+    if (targetCard) {
+      vp.scrollTo({
+        left: Math.max(0, targetCard.offsetLeft - 8),
+        behavior: S.reduced ? "auto" : "smooth",
+      });
+    }
+  };
 
-    if (window.innerWidth < 900 || S.reduced) {
-      if (vp) {
-        const cards = vp.querySelectorAll<HTMLElement>(".mod-card");
-        cards[alvo]?.scrollIntoView({ behavior: S.reduced ? "auto" : "smooth", inline: "center", block: "nearest" });
-      }
-      return;
-    }
-    if (sec) {
-      const span = Math.max(1, sec.offsetHeight - window.innerHeight);
-      const frac = alvo / Math.max(1, total - 1);
-      window.scrollTo({ top: sec.offsetTop + span * frac, behavior: "smooth" });
-    }
+  const onDragStart = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (modoGrade || e.button !== 0 || (e.target as HTMLElement).closest("a,button,input,select")) return;
+    const vp = viewportRef.current;
+    if (!vp) return;
+    dragRef.current = { ativo: true, startX: e.clientX, scrollLeft: vp.scrollLeft, moveu: false };
+    vp.classList.add("is-dragging");
+  };
+
+  const onDragMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current.ativo) return;
+    const vp = viewportRef.current;
+    if (!vp) return;
+    const dx = e.clientX - dragRef.current.startX;
+    if (Math.abs(dx) > 5) dragRef.current.moveu = true;
+    vp.scrollLeft = dragRef.current.scrollLeft - dx;
+  };
+
+  const onDragEnd = () => {
+    if (!dragRef.current.ativo) return;
+    dragRef.current.ativo = false;
+    viewportRef.current?.classList.remove("is-dragging");
   };
 
   const onCardMove = (e: React.MouseEvent<HTMLElement>) => {
@@ -278,11 +237,11 @@ export default function ModelosShowcase() {
   };
 
   return (
-    <section ref={secRef} className="modelos-sec" id="camara-03" aria-labelledby="t-modelos">
+    <section className="modelos-sec" id="camara-03" aria-labelledby="t-modelos">
       <div className="modelos-palco">
         <header className="modelos-cabecalho">
           <div>
-            <p className="cota" data-only="dev">Cota +12,00 m · Portal dos 13 Modelos · Cartuchos Interativos</p>
+            <p className="cota" data-only="dev">Cota +12,00 m · Portal dos 13 Modelos · Arraste ou use os botões</p>
             <p className="cota" data-only="empresa">Modelos prontos para adaptar ao seu negócio · 13 segmentos</p>
             <h2 id="t-modelos" className="disp">
               Exemplos por área de atuação
@@ -297,6 +256,14 @@ export default function ModelosShowcase() {
             </button>
             <button type="button" className="modelos-btn cota" onClick={() => irParaCard(1)} aria-label="Próximo modelo">
               Próximo
+            </button>
+            <button
+              type="button"
+              className={`modelos-btn cota${modoGrade ? " ativo" : ""}`}
+              aria-pressed={modoGrade}
+              onClick={() => setModoGrade((v) => !v)}
+            >
+              {modoGrade ? "Modo carrossel" : "Ver todos (13)"}
             </button>
           </div>
         </header>
@@ -320,9 +287,20 @@ export default function ModelosShowcase() {
 
         <div
           ref={viewportRef}
-          className="modelos-vp"
+          className={`modelos-vp${modoGrade ? " is-grade" : ""}`}
           tabIndex={0}
-          aria-label="Galeria dos 13 modelos de site. Use as setas esquerda e direita para navegar."
+          onScroll={atualizarProgresso}
+          onPointerDown={onDragStart}
+          onPointerMove={onDragMove}
+          onPointerUp={onDragEnd}
+          onPointerLeave={onDragEnd}
+          onClickCapture={(e) => {
+            if (dragRef.current.moveu) {
+              e.preventDefault();
+              dragRef.current.moveu = false;
+            }
+          }}
+          aria-label="Galeria dos 13 modelos de site. Role horizontalmente, arraste ou use as setas esquerda e direita."
           onKeyDown={(e) => {
             if (e.key === "ArrowLeft") {
               e.preventDefault();
@@ -333,7 +311,7 @@ export default function ModelosShowcase() {
             }
           }}
         >
-          <div ref={trackRef} className="modelos-trilha">
+          <div ref={trackRef} className={`modelos-trilha${modoGrade ? " is-grade" : ""}`}>
             {modelosVisiveis.map((m, i) => (
               <article
                 key={m.slug}

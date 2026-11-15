@@ -192,13 +192,6 @@ export default function Experience() {
 
     const limpar: (() => void)[] = [];
     const ctx = gsap.context(() => {
-      const skew = gsap.quickTo(".skew", "skewY", { duration: 0.5, ease: "power3" });
-      const skewTick = () => {
-        skew(clamp(S.vel * -0.05, -2.0, 2.0));
-      };
-      gsap.ticker.add(skewTick);
-      limpar.push(() => gsap.ticker.remove(skewTick));
-
       if (S.modo2D) {
         gsap.set(".palco", { clearProps: "opacity,transform,filter" });
       }
@@ -209,16 +202,16 @@ export default function Experience() {
         const hero = cena.dataset.cena === "hero";
         const tl = gsap.timeline({
           scrollTrigger: hero
-            ? { trigger: cena, start: "top top", end: "bottom top", scrub: 0.6 }
-            : { trigger: cena, start: "top bottom", end: "bottom top", scrub: 0.6 },
+            ? { trigger: cena, start: "top top", end: "bottom top", scrub: 0.5 }
+            : { trigger: cena, start: "top bottom", end: "bottom top", scrub: 0.5 },
           defaults: { ease: "none" },
         });
         if (hero) {
-          tl.to(palco, { opacity: 1, duration: 0.45 }).to(palco, { opacity: 0, yPercent: -8, filter: "blur(8px)", duration: 0.25 }).to({}, { duration: 0.3 });
+          tl.to(palco, { opacity: 1, duration: 0.5 }).to(palco, { opacity: 0, yPercent: -8, duration: 0.25 }).to({}, { duration: 0.25 });
         } else {
-          tl.fromTo(palco, { opacity: 0, yPercent: 8, filter: "blur(8px)" }, { opacity: 1, yPercent: 0, filter: "blur(0px)", duration: 0.25 }, 0.05)
+          tl.fromTo(palco, { opacity: 0, yPercent: 8 }, { opacity: 1, yPercent: 0, duration: 0.25 }, 0.05)
             .to(palco, { opacity: 1, duration: 0.4 }, 0.3)
-            .to(palco, { opacity: 0, yPercent: -8, filter: "blur(8px)", duration: 0.25 }, 0.7)
+            .to(palco, { opacity: 0, yPercent: -8, duration: 0.25 }, 0.7)
             .to({}, { duration: 0.05 }, 0.95);
         }
       });
@@ -355,19 +348,20 @@ export default function Experience() {
         tlAbertura = gsap.timeline({ onComplete: concluirAbertura });
 
         checks.forEach((el, i) => {
-          tlAbertura!.to(el, { opacity: 1, x: 0, duration: 0.12, ease: "power2.out" }, i * 0.08);
+          tlAbertura!.to(el, { opacity: 1, x: 0, duration: 0.08, ease: "power2.out" }, i * 0.04);
         });
         tlAbertura
-          .to(".pre__fio", { scaleY: 1, duration: 0.45, ease: "expo.out" }, 0.05)
-          .call(() => { if (num) num.textContent = "00"; }, undefined, 0.05)
-          .call(() => { if (num) num.textContent = "50"; }, undefined, 0.22)
-          .call(() => { if (num) num.textContent = "100"; S.ignition = 1; }, undefined, 0.42)
-          .to(".pre", { clipPath: "inset(0 0 100% 0)", duration: 0.55, ease: "expo.inOut" }, 0.48);
+          .to(".pre__fio", { scaleY: 1, duration: 0.25, ease: "expo.out" }, 0.02)
+          .call(() => { if (num) num.textContent = "00"; }, undefined, 0.02)
+          .call(() => { if (num) num.textContent = "50"; }, undefined, 0.14)
+          .call(() => { if (num) num.textContent = "100"; S.ignition = 1; }, undefined, 0.26)
+          .to(".pre", { clipPath: "inset(0 0 100% 0)", duration: 0.36, ease: "expo.inOut" }, 0.3);
         if (sp) {
-          tlAbertura.from(sp.chars, { yPercent: 110, rotate: 4, duration: 0.68, ease: "expo.out", stagger: 0.02 }, "-=0.3");
+          tlAbertura.from(sp.chars, { yPercent: 110, rotate: 4, duration: 0.5, ease: "expo.out", stagger: 0.015 }, "-=0.22");
         }
-        tlAbertura.to(".entra", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", stagger: 0.06 }, "-=0.4");
+        tlAbertura.to(".entra", { opacity: 1, y: 0, duration: 0.38, ease: "power3.out", stagger: 0.04 }, "-=0.3");
       };
+      lenis.start();
       document.fonts.ready.then(abrir);
     });
 

@@ -258,9 +258,9 @@ function QualityScaler({ aoDegradar }: { aoDegradar: () => void }) {
 
   useFrame((_, dt) => {
     if (done.current || S.reduced || S.paused) return;
-    if (dt > 0.045) {
+    if (dt > 0.038) {
       lentos.current += 1;
-      if (lentos.current >= 4) {
+      if (lentos.current >= 3) {
         done.current = true;
         S.lowQuality = true;
         gl.setPixelRatio(1);
@@ -334,12 +334,13 @@ export default function Scene() {
       aria-label="Mundo 3D contínuo com Globo NASA 2K, Cabos de Fibra, Prumo, Mascote PRUMO-NAVI, 8 Planetas e Império 3D"
       eventSource={evSource}
       eventPrefix="client"
-      dpr={softGpu ? [1, 1.2] : [1, 1.5]}
+      dpr={mobile || softGpu || degradado ? [1, 1.15] : [1, 1.35]}
       frameloop={pausado ? "never" : reduzido ? "demand" : "always"}
       camera={{ fov: 48, position: [0.35, 0.28, 6.8], near: 0.1, far: 340 }}
-      gl={{ antialias: !mobile && !softGpu, powerPreference: "high-performance" }}
+      gl={{ antialias: !mobile && !softGpu, powerPreference: "high-performance", stencil: false }}
       onCreated={({ gl }) => {
         S.webgl = true;
+        if (mobile) S.lowQuality = true;
         try {
           const raw = gl.getContext();
           const dbg = raw.getExtension("WEBGL_debug_renderer_info");
@@ -355,9 +356,9 @@ export default function Scene() {
       }}
       style={{ position: "fixed", inset: 0, width: "100%", height: "100%" }}
     >
-      <Environment resolution={256} frames={1}>
+      <Environment resolution={64} frames={1}>
         <mesh scale={160}>
-          <sphereGeometry args={[1, 18, 18]} />
+          <sphereGeometry args={[1, 14, 14]} />
           <meshBasicMaterial color="#071535" side={THREE.BackSide} />
         </mesh>
         <Lightformer form="rect" intensity={5.2} position={[-6, 8, 8]} scale={[16, 4, 1]} color="#fff1d6" />
@@ -372,9 +373,9 @@ export default function Scene() {
       <CameraMundo />
       <PrumoPendulo />
       <MascoteIA />
+      <SistemaSolar />
+      <CabosRedeEspacial />
       <Suspense fallback={null}>
-        <SistemaSolar />
-        <CabosRedeEspacial />
         <FogueteEspacial />
       </Suspense>
       <QuartoImperio />

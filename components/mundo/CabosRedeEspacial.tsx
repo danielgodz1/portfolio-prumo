@@ -42,15 +42,10 @@ interface PacoteSpec {
 
 const PACOTES: PacoteSpec[] = [
   { id: "p-win", trilha: 0, offset: 0.04, vel: 0.022, cor: "#38bdf8", tagEmpresa: "Servidores em Rede", tagDev: "INFRA · Windows Server + AD" },
-  { id: "p-mk", trilha: 1, offset: 0.14, vel: 0.025, cor: "#00ff9c", tagEmpresa: "Conexão Segura", tagDev: "REDE · MikroTik VPN & Firewall" },
-  { id: "p-iot", trilha: 0, offset: 0.22, vel: 0.02, cor: "#ffd23f", tagEmpresa: "Sensores em Campo", tagDev: "IOT · Sensores & Telemetria" },
-  { id: "p-fc", trilha: 0, offset: 0.34, vel: 0.019, cor: "#38bdf8", tagEmpresa: "Site & Checklist", tagDev: "SISTEMA · FlowCheck IA" },
-  { id: "p-fr", trilha: 2, offset: 0.39, vel: 0.021, cor: "#fb7185", tagEmpresa: "Pedidos Online", tagDev: "FLUXO · FlowRequest 48h" },
-  { id: "p-imp", trilha: 1, offset: 0.54, vel: 0.023, cor: "#ffd23f", tagEmpresa: "Imersão 3D ao Vivo", tagDev: "WEBGL · Império 3D Shader" },
-  { id: "p-mod", trilha: 0, offset: 0.64, vel: 0.02, cor: "#a5f3fc", tagEmpresa: "Sites por Ramo", tagDev: "SITES · 10 Modelos Interativos" },
-  { id: "p-sec", trilha: 2, offset: 0.75, vel: 0.022, cor: "#00ff9c", tagEmpresa: "Monitoramento 24h", tagDev: "SEC · Wazuh & Zabbix" },
-  { id: "p-hyp", trilha: 1, offset: 0.86, vel: 0.024, cor: "#7dd3fc", tagEmpresa: "Alta Disponibilidade", tagDev: "REPLICA · Hyper-V & Supabase" },
-  { id: "p-zap", trilha: 0, offset: 0.93, vel: 0.018, cor: "#ffd23f", tagEmpresa: "Contato WhatsApp", tagDev: "API · TOTVS RM & Automação" },
+  { id: "p-mk", trilha: 1, offset: 0.18, vel: 0.024, cor: "#00ff9c", tagEmpresa: "Conexão & IoT", tagDev: "REDE · MikroTik VPN & IoT" },
+  { id: "p-fc", trilha: 0, offset: 0.36, vel: 0.02, cor: "#ffd23f", tagEmpresa: "FlowCheck & Pedidos", tagDev: "SISTEMAS · FlowCheck & FlowRequest" },
+  { id: "p-imp", trilha: 1, offset: 0.56, vel: 0.022, cor: "#ffd23f", tagEmpresa: "Império 3D & 13 Modelos", tagDev: "WEBGL · Império 3D & 13 Modelos" },
+  { id: "p-sec", trilha: 2, offset: 0.78, vel: 0.021, cor: "#00ff9c", tagEmpresa: "Segurança 24h & WhatsApp", tagDev: "SEC · Wazuh · Zabbix · API" },
 ];
 
 /**
@@ -121,7 +116,7 @@ export default function CabosRedeEspacial() {
   }, []);
 
   const geometrias = useMemo(
-    () => trilhas.map((tr) => new THREE.TubeGeometry(tr.curva, 220, tr.raio, 8, false)),
+    () => trilhas.map((tr) => new THREE.TubeGeometry(tr.curva, 84, tr.raio, 6, false)),
     [trilhas],
   );
 

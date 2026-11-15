@@ -1,6 +1,6 @@
 "use client";
-import { useMemo, useRef } from "react";
-import { useFrame, useLoader } from "@react-three/fiber";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { S } from "../../lib/store";
@@ -102,9 +102,9 @@ export const PLANETAS: PlanetaSpec[] = [
     id: "saturno",
     ordem: "06",
     nome: "Saturno",
-    papel: "10 Modelos",
-    techEmpresa: "10 sites prontos para escolher o seu ramo",
-    techDev: "Sites Interativos · 10 Modelos · Conversão",
+    papel: "13 Modelos",
+    techEmpresa: "13 sites prontos para escolher o seu ramo",
+    techDev: "Sites Interativos · 13 Modelos · Conversão",
     pos: [-3.9, 0.3, -95],
     raio: 2.65,
     tex: "/texturas/planetas/2k_saturn.jpg",
@@ -196,17 +196,20 @@ function PlanetaComVFX({
   texVenusAtmos,
   texLua,
   texAnelSaturno,
+  lite,
 }: {
   spec: PlanetaSpec;
-  texMap: THREE.Texture;
+  texMap?: THREE.Texture;
   texNuvensTerra?: THREE.Texture;
   texNoiteTerra?: THREE.Texture;
   texVenusAtmos?: THREE.Texture;
   texLua?: THREE.Texture;
   texAnelSaturno?: THREE.Texture;
+  lite: boolean;
 }) {
   const grpRef = useRef<THREE.Group>(null);
   const esferaRef = useRef<THREE.Mesh>(null);
+  const matEsferaRef = useRef<THREE.MeshStandardMaterial>(null);
   const nuvensRef = useRef<THREE.Mesh>(null);
   const venusAtmosRef = useRef<THREE.Mesh>(null);
   const luaRef = useRef<THREE.Mesh>(null);
@@ -214,6 +217,11 @@ function PlanetaComVFX({
   const vfxParticlesRef = useRef<THREE.Points>(null);
   const tagRef = useRef<HTMLDivElement>(null);
   const techSpanRef = useRef<HTMLSpanElement>(null);
+  const lastVisTag = useRef(false);
+
+  useEffect(() => {
+    if (matEsferaRef.current) matEsferaRef.current.needsUpdate = true;
+  }, [texMap, texNoiteTerra]);
 
   const atmosUniforms = useMemo(
     () => ({
@@ -223,9 +231,9 @@ function PlanetaComVFX({
     [spec.corAtmos, spec.id],
   );
 
-  // Anel de partículas VFX orbitando cada planeta
   const particlesGeo = useMemo(() => {
-    const count = spec.id === "terra" ? 260 : 140;
+    const base = spec.id === "terra" ? 110 : 54;
+    const count = lite ? Math.round(base * 0.5) : base;
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       const ang = (i / count) * Math.PI * 2;
@@ -238,12 +246,11 @@ function PlanetaComVFX({
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
     return g;
-  }, [spec.id, spec.raio]);
+  }, [spec.id, spec.raio, lite]);
 
-  // Geometria radial de anel com mapeamento UV concêntrico (exige faixa 1D para textura real de Saturno)
   const anelGeo = useMemo(() => {
     if (!spec.aneis) return null;
-    const g = new THREE.RingGeometry(spec.aneis.inner, spec.aneis.outer, 96, 1);
+    const g = new THREE.RingGeometry(spec.aneis.inner, spec.aneis.outer, lite ? 48 : 72, 1);
     const pos = g.attributes.position;
     const uv = g.attributes.uv;
     const v3 = new THREE.Vector3();
@@ -256,7 +263,7 @@ function PlanetaComVFX({
     }
     uv.needsUpdate = true;
     return g;
-  }, [spec.aneis]);
+  }, [spec.aneis, lite]);
 
   const sprite = useMemo(() => obterSpriteParticulaCircular(), []);
 
@@ -272,11 +279,16 @@ function PlanetaComVFX({
       grpRef.current.visible = dz < 75;
       if (tagRef.current) {
         const mostrarTag = frente > -1.5 && frente < 18 && !S.modo2D && S.quartoActive < 0.35;
-        tagRef.current.style.opacity = mostrarTag ? String(THREE.MathUtils.clamp((18 - frente) / 6, 0, 1)) : "0";
-        tagRef.current.style.display = mostrarTag ? "grid" : "none";
-        if (mostrarTag && techSpanRef.current) {
-          const txt = S.audiencia === "dev" ? spec.techDev : spec.techEmpresa;
-          if (techSpanRef.current.textContent !== txt) techSpanRef.current.textContent = txt;
+        if (mostrarTag !== lastVisTag.current) {
+          lastVisTag.current = mostrarTag;
+          tagRef.current.style.display = mostrarTag ? "grid" : "none";
+        }
+        if (mostrarTag) {
+          tagRef.current.style.opacity = String(THREE.MathUtils.clamp((18 - frente) / 6, 0, 1));
+          if (techSpanRef.current) {
+            const txt = S.audiencia === "dev" ? spec.techDev : spec.techEmpresa;
+            if (techSpanRef.current.textContent !== txt) techSpanRef.current.textContent = txt;
+          }
         }
       }
       if (!grpRef.current.visible) return;
@@ -314,17 +326,22 @@ function PlanetaComVFX({
     window.dispatchEvent(new CustomEvent("prumo:jau-easter-egg"));
   };
 
+  const segs = lite ? 22 : 34;
+
   return (
     <group ref={grpRef} position={spec.pos}>
       <mesh ref={esferaRef}>
-        <sphereGeometry args={[spec.raio, 56, 56]} />
+        <sphereGeometry args={[spec.raio, segs, segs]} />
         <meshStandardMaterial
+          key={texMap ? "tx" : "base"}
+          ref={matEsferaRef}
+          color={texMap ? "#ffffff" : spec.corAtmos}
           map={texMap}
-          bumpMap={spec.bumpScale ? texMap : undefined}
-          bumpScale={spec.bumpScale ?? 0}
-          emissiveMap={spec.id === "terra" ? texNoiteTerra : undefined}
+          bumpMap={!lite && spec.bumpScale && texMap ? texMap : undefined}
+          bumpScale={!lite && spec.bumpScale ? spec.bumpScale : 0}
+          emissiveMap={!lite && spec.id === "terra" ? texNoiteTerra : undefined}
           emissive={spec.id === "terra" ? new THREE.Color("#ffd27a") : new THREE.Color("#000000")}
-          emissiveIntensity={spec.id === "terra" ? 0.52 : 0}
+          emissiveIntensity={spec.id === "terra" && texNoiteTerra ? 0.52 : 0}
           roughness={spec.id === "terra" ? 0.56 : spec.id === "urano" || spec.id === "netuno" ? 0.62 : 0.78}
           metalness={spec.id === "terra" ? 0.14 : 0.05}
         />
@@ -404,6 +421,7 @@ function PlanetaComVFX({
       {spec.aneis && anelGeo && (
         <mesh geometry={anelGeo} rotation={[spec.aneis.inclinaX, 0, spec.aneis.inclinaZ]}>
           <meshStandardMaterial
+            key={spec.aneis.usarTexSaturno && texAnelSaturno ? "ring-tx" : "ring-base"}
             map={spec.aneis.usarTexSaturno ? texAnelSaturno : undefined}
             color={spec.aneis.cor}
             emissive={spec.aneis.cor}
@@ -465,48 +483,76 @@ function PlanetaComVFX({
   );
 }
 
+const URLS_W0 = [
+  ["terra", "/texturas/planetas/2k_earth_daymap.jpg", true],
+  ["milky", "/texturas/planetas/2k_stars_milky_way.jpg", true],
+  ["lua", "/texturas/planetas/2k_moon.jpg", true],
+] as const;
+
+const URLS_W1 = [
+  ["mercurio", "/texturas/planetas/2k_mercury.jpg", true],
+  ["venus", "/texturas/planetas/2k_venus_surface.jpg", true],
+  ["venusAtmos", "/texturas/planetas/2k_venus_atmosphere.jpg", true],
+  ["marte", "/texturas/planetas/2k_mars.jpg", true],
+  ["nuvens", "/texturas/planetas/2k_earth_clouds.jpg", true],
+  ["terraNoite", "/texturas/planetas/2k_earth_nightmap.jpg", true],
+] as const;
+
+const URLS_W2 = [
+  ["jupiter", "/texturas/planetas/2k_jupiter.jpg", true],
+  ["saturno", "/texturas/planetas/2k_saturn.jpg", true],
+  ["saturnoAnel", "/texturas/planetas/2k_saturn_ring_alpha.png", false],
+  ["urano", "/texturas/planetas/2k_uranus.jpg", true],
+  ["netuno", "/texturas/planetas/2k_neptune.jpg", true],
+] as const;
+
 /**
- * Sistema Solar contínuo com texturas reais 2K da NASA / Solar System Scope,
- * Via Láctea ao fundo e campo estelar reativo ao deslocamento espacial.
+ * Sistema Solar contínuo com carregamento progressivo em 3 ondas (zero travamento no boot),
+ * texturas NASA/Solar System Scope, Via Láctea e orçamento de GPU adaptativo.
  */
 export default function SistemaSolar() {
   const starRef = useRef<THREE.Points>(null);
+  const [texDict, setTexDict] = useState<Record<string, THREE.Texture>>({});
+  const lite = useMemo(
+    () =>
+      S.lowQuality ||
+      (typeof window !== "undefined" &&
+        (window.matchMedia("(max-width:800px)").matches || (navigator.hardwareConcurrency || 8) <= 4)),
+    [],
+  );
 
-  const texturas = useLoader(THREE.TextureLoader, [
-    "/texturas/planetas/2k_earth_daymap.jpg", // 0
-    "/texturas/planetas/2k_earth_nightmap.jpg", // 1
-    "/texturas/planetas/2k_earth_clouds.jpg", // 2
-    "/texturas/planetas/2k_moon.jpg", // 3
-    "/texturas/planetas/2k_mercury.jpg", // 4
-    "/texturas/planetas/2k_venus_atmosphere.jpg", // 5
-    "/texturas/planetas/2k_mars.jpg", // 6
-    "/texturas/planetas/2k_jupiter.jpg", // 7
-    "/texturas/planetas/2k_saturn.jpg", // 8
-    "/texturas/planetas/2k_saturn_ring_alpha.png", // 9
-    "/texturas/planetas/2k_uranus.jpg", // 10
-    "/texturas/planetas/2k_neptune.jpg", // 11
-    "/texturas/planetas/2k_stars_milky_way.jpg", // 12
-    "/texturas/planetas/2k_venus_surface.jpg", // 13
-  ]);
+  useEffect(() => {
+    let ativo = true;
+    const loader = new THREE.TextureLoader();
 
-  texturas.forEach((tx, idx) => {
-    if (idx !== 9) tx.colorSpace = THREE.SRGBColorSpace;
-  });
+    const carregarOnda = (lista: readonly (readonly [string, string, boolean])[]) => {
+      lista.forEach(([chave, url, srgb]) => {
+        loader.load(url, (tx) => {
+          if (!ativo) {
+            tx.dispose();
+            return;
+          }
+          if (srgb) tx.colorSpace = THREE.SRGBColorSpace;
+          tx.generateMipmaps = !lite;
+          if (lite) tx.minFilter = THREE.LinearFilter;
+          setTexDict((prev) => ({ ...prev, [chave]: tx }));
+        });
+      });
+    };
 
-  const mapById: Record<string, THREE.Texture> = {
-    terra: texturas[0],
-    mercurio: texturas[4],
-    venus: texturas[13],
-    marte: texturas[6],
-    jupiter: texturas[7],
-    saturno: texturas[8],
-    urano: texturas[10],
-    netuno: texturas[11],
-  };
+    carregarOnda(URLS_W0);
+    const t1 = window.setTimeout(() => carregarOnda(URLS_W1), 200);
+    const t2 = window.setTimeout(() => carregarOnda(URLS_W2), 650);
 
-  // 2.200 estrelas ao longo de todo o corredor espacial Z (z = +15 até -155)
+    return () => {
+      ativo = false;
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
+  }, [lite]);
+
   const starsGeo = useMemo(() => {
-    const n = 2200;
+    const n = lite ? 420 : 920;
     const pos = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) {
       pos[i * 3] = (((i * 73) % 1000) / 1000 - 0.5) * 68;
@@ -516,7 +562,7 @@ export default function SistemaSolar() {
     const g = new THREE.BufferGeometry();
     g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
     return g;
-  }, []);
+  }, [lite]);
 
   const starSprite = useMemo(() => obterSpriteParticulaCircular(), []);
 
@@ -528,12 +574,12 @@ export default function SistemaSolar() {
 
   return (
     <group>
-      {/* Via Láctea real como fundo espacial profundo (fog={false} evita escurecimento pela névoa) */}
+      {/* Via Láctea real como fundo espacial profundo */}
       <mesh position={[0, 0, -60]} scale={165}>
-        <sphereGeometry args={[1, 32, 32]} />
+        <sphereGeometry args={[1, 20, 20]} />
         <meshBasicMaterial
-          map={texturas[12]}
-          color="#1e3a8a"
+          map={texDict.milky}
+          color={texDict.milky ? "#1e3a8a" : "#071432"}
           transparent
           opacity={0.38}
           side={THREE.BackSide}
@@ -544,7 +590,7 @@ export default function SistemaSolar() {
 
       <points ref={starRef} geometry={starsGeo}>
         <pointsMaterial
-          size={0.18}
+          size={0.2}
           map={starSprite ?? undefined}
           alphaTest={0.01}
           color="#dbeafe"
@@ -560,12 +606,13 @@ export default function SistemaSolar() {
         <PlanetaComVFX
           key={spec.id}
           spec={spec}
-          texMap={mapById[spec.id]}
-          texNuvensTerra={spec.id === "terra" ? texturas[2] : undefined}
-          texNoiteTerra={spec.id === "terra" ? texturas[1] : undefined}
-          texVenusAtmos={spec.id === "venus" ? texturas[5] : undefined}
-          texLua={spec.id === "terra" ? texturas[3] : undefined}
-          texAnelSaturno={spec.id === "saturno" ? texturas[9] : undefined}
+          lite={lite}
+          texMap={texDict[spec.id]}
+          texNuvensTerra={spec.id === "terra" ? texDict.nuvens : undefined}
+          texNoiteTerra={spec.id === "terra" ? texDict.terraNoite : undefined}
+          texVenusAtmos={spec.id === "venus" ? texDict.venusAtmos : undefined}
+          texLua={spec.id === "terra" ? texDict.lua : undefined}
+          texAnelSaturno={spec.id === "saturno" ? texDict.saturnoAnel : undefined}
         />
       ))}
     </group>
