@@ -54,6 +54,7 @@ test.describe("portfolio-prumo — Awwwards Scrollytelling Z, Empresas, Devs & S
 
     await page.waitForTimeout(750);
     await expect(page.locator(".planeta-tag").first()).toContainText("PLANETA 01");
+    await expect(page.locator(".navi-hud")).toBeVisible();
     await shot(page, "01-hero-terra-foguete.png");
 
     // Verifica Ato 01 em profundidade Z e atualização planetária no HUD
@@ -83,7 +84,7 @@ test.describe("portfolio-prumo — Awwwards Scrollytelling Z, Empresas, Devs & S
     expect(erros).toEqual([]);
   });
 
-  test("percorre fluxo completo (?para=dev): infra, FlowCheck, Império 3D, 10 Modelos, Hex Viewer e Contato", async ({ page }) => {
+  test("percorre fluxo completo (?para=dev): infra, FlowCheck, Império 3D, 13 Modelos, Hex Viewer e Contato", async ({ page }) => {
     await page.goto("/?para=dev", { waitUntil: "domcontentloaded" });
     await page.locator("[data-pre-pular]").click({ timeout: 2000 }).catch(() => {});
     await page.waitForFunction(() => document.documentElement.classList.contains("pronto"), { timeout: 10_000 });
@@ -97,6 +98,8 @@ test.describe("portfolio-prumo — Awwwards Scrollytelling Z, Empresas, Devs & S
     const passoCheck = page.locator("#emul-flowcheck .emul__passo-btn").nth(1);
     await passoCheck.click();
     await expect(passoCheck).toHaveClass(/on/);
+    await page.locator("#emul-flowcheck .emul__dica-btn").first().click();
+    await expect(page.locator("#emul-flowcheck .emul__dica-painel")).toContainText("Row-Level Security");
 
     await page.locator("#camara-02").scrollIntoViewIfNeeded();
     await page.waitForTimeout(450);
@@ -105,8 +108,12 @@ test.describe("portfolio-prumo — Awwwards Scrollytelling Z, Empresas, Devs & S
 
     await page.locator("#camara-03").scrollIntoViewIfNeeded();
     await page.waitForTimeout(350);
-    await expect(page.locator("#camara-03 .mod-card:not(.mod-card--cta)")).toHaveCount(10);
-    await expect(page.locator("#camara-03 .mod-card__acao").first()).toContainText("Ver demonstração");
+    await expect(page.locator("#camara-03 .mod-card:not(.mod-card--cta)")).toHaveCount(13);
+    await expect(page.locator("#camara-03 .mod-card__acao").first()).toContainText("Abrir demonstração");
+    await page.getByRole("button", { name: "Gastronomia & Delivery" }).click();
+    await expect(page.locator("#camara-03 .mod-card:not(.mod-card--cta)")).toHaveCount(3);
+    await page.getByRole("button", { name: "Todos" }).click();
+    await expect(page.locator("#camara-03 .mod-card:not(.mod-card--cta)")).toHaveCount(13);
     await shot(page, "04-modelos.png");
 
     await page.locator("#camara-04").scrollIntoViewIfNeeded();
@@ -114,11 +121,15 @@ test.describe("portfolio-prumo — Awwwards Scrollytelling Z, Empresas, Devs & S
     const secondHex = page.locator(".kernel-row").nth(1);
     await secondHex.click();
     await expect(secondHex).toHaveAttribute("aria-selected", "true");
+    await page.locator(".kernel-toggle").click();
+    await page.locator(".kernel-term__chip", { hasText: "zelda" }).click();
+    await expect(page.locator(".kernel-term__log")).toContainText("RTX 5060 Ti");
 
     await page.locator("#contato").scrollIntoViewIfNeeded();
     await page.waitForTimeout(300);
+    await page.getByRole("button", { name: "Oportunidade / Recrutamento TI & Dev" }).click();
     await expect(page.locator(".contato__copiar")).toBeVisible();
-    await expect(page.locator(".cta--whats")).toHaveAttribute("href", /wa\.me\/5514997345164/);
+    await expect(page.locator(".cta--whats")).toHaveAttribute("href", /Recrutamento/);
     await shot(page, "05-contato.png");
   });
 
@@ -165,5 +176,16 @@ test.describe("portfolio-prumo — Awwwards Scrollytelling Z, Empresas, Devs & S
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(1);
     await shot(page, "06-mobile-hero.png");
+  });
+
+  test("Windows prefers-reduced-motion não desliga WebGL nem esconde elementos sem clique explícito", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.locator("[data-pre-pular]").click({ timeout: 2000 }).catch(() => {});
+    await page.waitForFunction(() => document.documentElement.classList.contains("pronto"), { timeout: 10_000 });
+
+    await expect(page.locator("html")).not.toHaveClass(/reduzir/);
+    await expect(page.locator(".canvas-fundo canvas").first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator(".hero__titulo-emp")).toBeVisible();
   });
 });

@@ -1,14 +1,21 @@
 "use client";
 import { useState } from "react";
 import { CONTATO } from "../lib/dados";
-import { linkWhatsApp, registrarCliqueWhatsApp } from "../lib/site";
+import { linkWhatsApp, MODELOS_BASE_URL, registrarCliqueWhatsApp } from "../lib/site";
 import { S } from "../lib/store";
 import { tocarTransmissao } from "../lib/som";
+
+const ASSUNTOS_RAPIDOS = [
+  "Quero um site/sistema para minha empresa",
+  "Oportunidade / Recrutamento TI & Dev",
+  "Projeto sob medida / Integração",
+] as const;
 
 export default function ContatoCanal() {
   const [copiado, setCopiado] = useState(false);
   const [nome, setNome] = useState("");
   const [assunto, setAssunto] = useState("");
+  const [assuntoPreset, setAssuntoPreset] = useState<string>(ASSUNTOS_RAPIDOS[0]);
 
   const dispararReverenciaNavi = () => {
     S.naviTransmit = 1;
@@ -38,9 +45,11 @@ export default function ContatoCanal() {
     }
   };
 
+  const textoAssunto = assunto.trim() || assuntoPreset;
+
   const urlWhatsAppPadrao = linkWhatsApp({
     camara: "contato",
-    mensagem: `Oi Daniel! Vi seu portfólio${nome ? ` (sou ${nome})` : ""} e quero conversar sobre ${assunto.trim() || "um site ou sistema para o meu negócio"}.`,
+    mensagem: `Oi Daniel! Vi seu portfólio${nome ? ` (sou ${nome})` : ""} e o assunto é: ${textoAssunto}.`,
   });
 
   const abrirWhatsApp = (e?: React.FormEvent) => {
@@ -64,6 +73,25 @@ export default function ContatoCanal() {
           <p id="t-contato" className="cota">
             Canal direto · Jaú/SP · Resposta rápida
           </p>
+          <div className="contato__assuntos" role="group" aria-label="Escolha o assunto em 1 clique">
+            {ASSUNTOS_RAPIDOS.map((item) => {
+              const ativo = assuntoPreset === item;
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  className={`contato__assunto-btn cota${ativo ? " ativo" : ""}`}
+                  aria-pressed={ativo}
+                  onClick={() => {
+                    setAssuntoPreset(item);
+                    setAssunto(item);
+                  }}
+                >
+                  {item}
+                </button>
+              );
+            })}
+          </div>
           <a
             className="cta cta--whats disp"
             href={urlWhatsAppPadrao}
@@ -105,6 +133,15 @@ export default function ContatoCanal() {
             </a>
             <a href={CONTATO.linkedin} onClick={dispararReverenciaNavi} target="_blank" rel="noopener noreferrer" data-cursor="hover" data-swap>
               LinkedIn · danieldossantos-ti
+            </a>
+            <a
+              href={`${MODELOS_BASE_URL}/`}
+              onClick={dispararReverenciaNavi}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-cursor="view"
+            >
+              Catálogo · 13 Modelos
             </a>
           </div>
         </div>

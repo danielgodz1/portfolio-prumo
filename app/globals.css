@@ -345,9 +345,7 @@ html.modo-2d .mod-card { flex: initial; min-width: 0; }
   .hero__painel { margin-left: 0; }
   .contato__grade { grid-template-columns: 1fr; }
 }
-@media (prefers-reduced-motion: reduce) {
-  html:not(.movimento-forcado) * { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
-}
+html.reduzir * { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 
 /* Camadas empresa vs dev (ordem cronológica única dos 4 atos no HTML) */
 .palco-fluxo { display: flex; flex-direction: column; }
@@ -640,4 +638,106 @@ html.modo-2d .ato-z__profundidade, html.reduzir .ato-z__profundidade { transform
   .planeta-tag { min-width: 10.5rem; max-width: 13.5rem; padding: .42rem .6rem; }
   .planeta-tag__papel { font-size: .84rem; }
   .cabo-pacote-tag { font-size: .56rem; padding: .2rem .45rem; }
+  .hero-palco { padding-bottom: 9.5rem; }
+  .hud-min { flex-wrap: wrap; gap: .4rem; }
+  .hud-min__dados { max-width: 100%; overflow: hidden; }
+  .hud-min__sep:not(.hud-min__status) { display: none; }
+  .hud-min__ctrls { flex-wrap: wrap; }
+}
+
+/* Preloader checklist tático + Microcopy Hero */
+.pre__lista {
+  list-style: none; margin: .4rem 0 0; padding: 0; display: grid; gap: .3rem;
+  font-size: .74rem; color: rgb(236 238 240 / .86); text-align: left;
+}
+.pre__lista b { color: var(--giz); font-weight: 700; }
+.hero-palco__micro { margin: .15rem 0 0; font-size: .76rem; color: rgb(236 238 240 / .72); }
+.hud-min__dados {
+  display: inline-flex; flex-wrap: wrap; align-items: center; gap: .35rem .65rem;
+  padding: .42rem .8rem; background: rgb(3 9 27 / .78); backdrop-filter: blur(8px);
+  border: 1px solid rgb(236 238 240 / .18); color: rgb(236 238 240 / .92); font-size: .72rem;
+  font-variant-numeric: tabular-nums;
+}
+.hud-min__cota { padding: 0; background: transparent; border: 0; color: var(--giz); font-size: inherit; }
+.hud-min__sep { border-left: 1px solid rgb(236 238 240 / .28); padding-left: .65rem; color: rgb(236 238 240 / .86); }
+.contato { padding-bottom: clamp(6rem, 11vh, 9rem); }
+
+/* Tooltips técnicos nas emulações */
+.emul__dicas { display: grid; gap: .55rem; margin-top: .25rem; }
+.emul__dicas-btns { display: flex; flex-wrap: wrap; gap: .45rem; }
+.emul__dica-btn {
+  min-height: 44px; padding: .35rem .75rem; border: 1px solid rgb(236 238 240 / .28);
+  background: rgb(5 11 30 / .82); color: rgb(236 238 240 / .92); font-size: .7rem; cursor: pointer;
+}
+.emul__dica-btn.ativo, .emul__dica-btn:hover { border-color: var(--giz); color: var(--giz); }
+.emul__dica-painel {
+  margin: 0; padding: .65rem .85rem; background: rgb(5 11 30 / .92);
+  border-left: 3px solid var(--giz); font-size: .88rem; line-height: 1.45; color: var(--papel);
+}
+
+/* Filtros e barra de teste dos 13 modelos */
+.modelos-filtros { display: flex; flex-wrap: wrap; gap: .5rem; margin: .85rem 0 1.1rem; }
+.modelos-filtro {
+  min-height: 44px; padding: .35rem .9rem; border: 1px solid rgb(236 238 240 / .28);
+  background: rgb(5 11 30 / .84); color: var(--papel); font-size: .72rem; cursor: pointer;
+}
+.modelos-filtro.ativo, .modelos-filtro:hover {
+  background: var(--giz); color: var(--grafite); border-color: var(--giz); font-weight: 700;
+}
+.modelos-demo-barra {
+  margin-top: 1.15rem; padding: 1rem 1.25rem; background: rgb(5 11 30 / .9);
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .85rem 1.25rem;
+}
+.modelos-demo-barra p { margin: 0; font-size: .96rem; max-width: 48ch; }
+.modelos-demo-barra__acoes { display: flex; flex-wrap: wrap; gap: .65rem; align-items: center; }
+
+/* Pilares e terminal Kernel (+15,00 m) */
+.pilares-grid {
+  list-style: none; margin: 0 0 1.4rem; padding: 0;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(16.5rem, 1fr)); gap: 1rem;
+}
+.pilar-card { padding: 1.15rem; background: rgb(5 11 30 / .86); display: grid; gap: .6rem; align-content: start; }
+.pilar-card__cod { font-size: .72rem; color: var(--giz); }
+.pilar-card h3 { margin: 0; font-size: 1.25rem; }
+.pilar-card__resumo { margin: 0; font-size: .9rem; line-height: 1.45; color: rgb(236 238 240 / .86); }
+.pilar-card__itens { list-style: none; margin: .25rem 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .38rem; }
+.pilar-card__itens li {
+  padding: .22rem .55rem; background: rgb(15 44 122 / .55); border: 1px solid rgb(236 238 240 / .22); font-size: .68rem;
+}
+.kernel-toggle-linha { display: flex; flex-wrap: wrap; align-items: center; gap: .65rem 1rem; margin-bottom: 1rem; }
+.kernel-toggle {
+  min-height: 44px; padding: .4rem 1rem; border: 1.5px solid var(--giz);
+  background: rgb(5 11 30 / .9); color: var(--giz); font-size: .76rem; cursor: pointer;
+}
+.kernel-toggle.ativo, .kernel-toggle:hover { background: var(--giz); color: var(--grafite); font-weight: 700; }
+.kernel-toggle__hint { font-size: .72rem; opacity: .82; }
+.kernel-term {
+  padding: .9rem; background: rgb(3 9 27 / .94); border: 1px solid rgb(255 210 63 / .4);
+  display: grid; gap: .65rem;
+}
+.kernel-term__atalhos { display: flex; flex-wrap: wrap; gap: .4rem; }
+.kernel-term__chip {
+  min-height: 36px; padding: .2rem .65rem; border: 1px solid rgb(236 238 240 / .3);
+  background: rgb(15 44 122 / .6); color: var(--papel); font-size: .7rem; cursor: pointer;
+}
+.kernel-term__chip:hover { border-color: var(--giz); color: var(--giz); }
+.kernel-term__log { display: grid; gap: .3rem; font-size: .74rem; color: rgb(236 238 240 / .92); }
+.kernel-term__log p { margin: 0; }
+.kernel-term__form { display: flex; gap: .5rem; align-items: center; border-top: 1px solid rgb(236 238 240 / .18); padding-top: .55rem; }
+.kernel-term__form input {
+  flex: 1; min-width: 0; min-height: 40px; padding: .3rem .6rem;
+  background: rgb(15 44 122 / .45); border: 1px solid rgb(236 238 240 / .28); color: var(--papel); font-family: inherit;
+}
+.kernel-term__form button {
+  min-height: 40px; padding: .3rem .85rem; background: var(--giz); color: var(--grafite); border: 0; font-weight: 700; cursor: pointer;
+}
+
+/* Seletor de assunto 1-clique no Contato */
+.contato__assuntos { display: flex; flex-wrap: wrap; gap: .5rem; }
+.contato__assunto-btn {
+  min-height: 44px; padding: .35rem .8rem; border: 1px solid rgb(236 238 240 / .3);
+  background: rgb(5 11 30 / .84); color: var(--papel); font-size: .7rem; cursor: pointer; text-align: left;
+}
+.contato__assunto-btn.ativo, .contato__assunto-btn:hover {
+  border-color: var(--giz); background: rgb(255 210 63 / .14); color: var(--giz);
 }
