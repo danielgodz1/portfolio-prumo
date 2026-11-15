@@ -6,6 +6,7 @@ import Cursor from "../components/Cursor";
 import SceneLoader from "../components/SceneLoader";
 import Cena3D from "../components/Cena3D";
 import HudMissao from "../components/HudMissao";
+import NaviHud from "../components/NaviHud";
 import EmulLoader from "../components/EmulLoader";
 import ModelosShowcase from "../components/ModelosShowcase";
 import ContatoCanal from "../components/ContatoCanal";
@@ -28,10 +29,10 @@ export default function Page() {
         Pular para o conteúdo
       </a>
 
-      {/* Preloader minimalista com fio de prumo e botão pular imediato */}
+      {/* Preloader tático com fio de prumo e botão pular imediato */}
       <div className="pre pre--limpo" role="region" aria-label="Abertura">
         <div className="pre__topo cota">
-          <span>DANIEL DOS SANTOS · JAÚ/SP</span>
+          <span>O PRUMO // THE KERNEL TOWER</span>
           <button type="button" className="pre__pular cota" data-pre-pular>
             Pular [ESC]
           </button>
@@ -41,23 +42,38 @@ export default function Page() {
           <span className="pre__num disp" data-pre-num>
             03
           </span>
+          <ul className="pre__lista cota" aria-label="Checagem inicial">
+            <li>
+              <b>[OK]</b> KERNEL_PRUMO_OS // BOOT
+            </li>
+            <li>
+              <b>[OK]</b> R3F_SHADER_PIPELINE // 60_FPS
+            </li>
+            <li>
+              <b>[OK]</b> INFRA_LINK // JAU_SP_22°17&apos;S
+            </li>
+            <li>
+              <b>[OK]</b> AI_COMPANION // ONLINE
+            </li>
+          </ul>
         </div>
         <div className="pre__base cota">
-          <span data-pre-check>DO ZERO AO REAL</span>
+          <span data-pre-check>DO ZERO AO AR</span>
         </div>
       </div>
 
       <SceneLoader />
       <NavegacaoTopo />
       <HudMissao />
+      <NaviHud />
       <Cursor />
 
       <main id="conteudo" className="skew palco-fluxo">
-        {/* HERO CINEMATOGRÁFICO ABERTO: SEM CAIXOTES OPACOS SOBRE O 3D */}
+        {/* HERO CINEMATOGRÁFICO ABERTO: COTA +0,00 m */}
         <section className="hero-palco ord-hero" id="topo" data-cena="hero" aria-label="Apresentação">
           <div className="hero-palco__miolo">
             <p className="cota hero-palco__eyebrow entra">
-              Daniel dos Santos · Jaú, SP
+              JAÚ, SP · SISTEMAS EM PRODUÇÃO, INFRAESTRUTURA CRÍTICA &amp; WEBGL 3D
             </p>
 
             <h1 className="hero-palco__titulo disp" data-hero-nome>
@@ -78,7 +94,7 @@ export default function Page() {
               {SITE.empresaSubtitulo}
             </p>
             <p className="hero-palco__sub entra" data-only="dev">
-              {SITE.subtitulo} · Sistemas web em produção, infraestrutura crítica e WebGL 3D.
+              {SITE.subtitulo} · Sistemas web em produção, infraestrutura corporativa e WebGL 3D.
             </p>
 
             <div className="hero-palco__acoes entra">
@@ -89,24 +105,31 @@ export default function Page() {
                   microcopy="Atendimento direto de Jaú/SP"
                   mensagem="Oi Daniel! Vi o seu site novo e quero conversar sobre um projeto para a minha empresa."
                 />
-                <a href="#ato-01" className="hero-palco__scroll" data-cursor="hover">
-                  Decolar pelos 8 planetas
+                <a href="#camara-03" className="hero__cta hero__cta--sec" data-cursor="hover">
+                  Ver os 13 modelos para empresas
+                </a>
+                <a href="#projetos" className="hero-palco__scroll" data-cursor="hover">
+                  Inspecionar sistemas e obras
                 </a>
                 <BotaoSomHero />
               </div>
               <div data-only="dev" className="hero-palco__cta-linha">
                 <a href="#projetos" className="hero__cta hero__cta--prim" data-mag data-cursor="hover">
-                  Explorar sistemas e 3D
+                  Inspecionar sistemas e obras
                 </a>
                 <a href="#camara-03" className="hero__cta hero__cta--sec" data-cursor="hover">
-                  Ver 10 modelos
+                  Ver os 13 modelos para empresas
                 </a>
                 <a href="#contato" className="hero__cta hero__cta--sec" data-cursor="hover">
-                  Contato
+                  Quero conversar no WhatsApp
                 </a>
                 <BotaoSomHero />
               </div>
             </div>
+
+            <p className="cota hero-palco__micro entra">
+              Role para subir os andares da obra · Dê dois cliques para soltar o prumo em queda livre
+            </p>
 
             <AudienciaSwitch />
           </div>
@@ -203,9 +226,9 @@ export default function Page() {
         <AtoProfundidadeZ
           id="ato-03"
           className="ord-ato03"
-          ato="ATO 03 · +6,00 m · ÓRBITA DE JÚPITER · ARQUITETURA 3D"
+          ato="ATO 03 · +9,00 m · ÓRBITA DE JÚPITER · ARQUITETURA 3D"
           titulo="Depois a planta baixa virou um quarto 3D se montando diante de você."
-          subtitulo="Para a Império Móveis Planejados de Jaú, o site nasceu como extensão da marcenaria: do traço inicial até acender os perfis de LED 2700K."
+          subtitulo="Para a Império Móveis Planejados de Jaú, o site nasceu como extensão da marcenaria: do traço inicial até acender os perfis de LED 2700K e posicionar na primeira página do Google."
         />
 
         <section id="camara-02" className="ord-imperio" aria-label="Império Móveis Planejados em 3D">
@@ -244,13 +267,13 @@ export default function Page() {
           </article>
         </section>
 
-        {/* ATO 04: 10 MODELOS INTERATIVOS + FECHAMENTO WHATSAPP */}
+        {/* ATO 04: 13 MODELOS INTERATIVOS + FECHAMENTO WHATSAPP */}
         <AtoProfundidadeZ
           id="ato-04"
           className="ord-ato04"
-          ato="ATO 04 · +9,00 m · SATURNO A NETUNO · PARA O SEU NEGÓCIO"
+          ato="ATO 04 · +12,00 m · SATURNO A NETUNO · PARA O SEU NEGÓCIO"
           titulo="Agora escolha o ponto de partida da sua empresa."
-          subtitulo="Dez segmentos com identidade visual própria e navegação imediata. Você testa ao vivo e me chama direto no WhatsApp."
+          subtitulo="Treze segmentos com identidade visual própria e navegação imediata. Você filtra, testa ao vivo e me chama direto no WhatsApp."
         />
 
         <div className="ord-modelos">
@@ -260,8 +283,8 @@ export default function Page() {
         <section className="nums ord-nums" aria-label="Números reais">
           <p className="nums__rot cota">Números verificáveis</p>
           <div>
-            <b className="disp nums__odometro" data-conta="10" data-target="10">
-              10
+            <b className="disp nums__odometro" data-conta="13" data-target="13">
+              13
             </b>
             <span>modelos prontos por segmento, de academia a engenharia civil</span>
           </div>
@@ -293,7 +316,7 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="ord-kernel" data-only="dev">
+        <div className="ord-kernel">
           <KernelDumpSecao />
         </div>
 

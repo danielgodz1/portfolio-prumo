@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { MODELOS } from "../lib/dados";
+import { MODELOS, type SetorModelo } from "../lib/dados";
 import { MODELOS_BASE_URL, MODELO_CUSTOM_ATIVO } from "../lib/site";
 import { S } from "../lib/store";
 import CtaWhatsApp from "./CtaWhatsApp";
@@ -102,6 +102,29 @@ function MicroPreview({ slug }: { slug: string }) {
           <polygon className="porta-d" points="90,14 126,14 126,60 90,60" fill="rgb(255 210 63 / .16)" stroke="#FFD23F" strokeWidth="2" />
         </svg>
       );
+    case "metalurgica":
+      return (
+        <svg viewBox="0 0 180 72" className="mod-svg mod-svg--metal" aria-hidden="true">
+          <rect x="28" y="44" width="124" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="2" />
+          <polyline points="40,44 64,22 108,22 132,44" fill="none" stroke="#FFD23F" strokeWidth="2.2" />
+          <circle cx="90" cy="33" r="5" fill="#FFD23F" />
+        </svg>
+      );
+    case "empresa":
+      return (
+        <svg viewBox="0 0 180 72" className="mod-svg mod-svg--empresa" aria-hidden="true">
+          <rect x="70" y="14" width="40" height="46" rx="3" fill="rgb(255 210 63 / .1)" stroke="#FFD23F" strokeWidth="2.2" />
+          <rect x="44" y="26" width="20" height="34" rx="2" fill="none" stroke="currentColor" strokeWidth="2" />
+          <rect x="116" y="26" width="20" height="34" rx="2" fill="none" stroke="currentColor" strokeWidth="2" />
+        </svg>
+      );
+    case "calcados":
+      return (
+        <svg viewBox="0 0 180 72" className="mod-svg mod-svg--calcados" aria-hidden="true">
+          <path d="M40 46 C62 24 94 26 116 38 L142 44 L142 52 L40 52 Z" fill="none" stroke="currentColor" strokeWidth="2.2" />
+          <line x1="40" y1="56" x2="144" y2="56" stroke="#FFD23F" strokeWidth="2.6" strokeLinecap="round" />
+        </svg>
+      );
     default:
       return (
         <svg viewBox="0 0 180 72" className="mod-svg mod-svg--engenharia" aria-hidden="true">
@@ -114,10 +137,19 @@ function MicroPreview({ slug }: { slug: string }) {
   }
 }
 
+const SETORES: ("Todos" | SetorModelo)[] = [
+  "Todos",
+  "Gastronomia & Delivery",
+  "Moda & Beleza",
+  "Engenharia & Indústria",
+  "Serviços",
+];
+
 export default function ModelosShowcase() {
   const secRef = useRef<HTMLElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const [setorAtivo, setSetorAtivo] = useState<"Todos" | SetorModelo>("Todos");
   const [ativoIdx, setAtivoIdx] = useState(0);
   const [progPct, setProgPct] = useState(0);
   const [motionRev, setMotionRev] = useState(0);
@@ -125,6 +157,8 @@ export default function ModelosShowcase() {
   const [empCor, setEmpCor] = useState("#0F2C7A");
   const [empWhats, setEmpWhats] = useState("");
   const [empSlug, setEmpSlug] = useState(MODELOS[0]?.slug ?? "academia");
+
+  const modelosVisiveis = setorAtivo === "Todos" ? MODELOS : MODELOS.filter((m) => m.setor === setorAtivo);
 
   useEffect(() => {
     const onMotion = () => setMotionRev((v) => v + 1);
@@ -144,6 +178,8 @@ export default function ModelosShowcase() {
     if (!sec || !vp || !track) return;
 
     const isDesktop = () => window.innerWidth >= 900 && !S.modo2D;
+    setAtivoIdx(0);
+    setProgPct(0);
 
     if (S.reduced || !isDesktop()) {
       track.style.transform = "";
@@ -151,10 +187,10 @@ export default function ModelosShowcase() {
       return;
     }
 
-    const totalCards = MODELOS.length + 1;
+    const totalCards = modelosVisiveis.length + 1;
     const setup = () => {
       const dist = Math.max(0, track.scrollWidth - vp.clientWidth);
-      sec.style.height = `${Math.max(180, Math.round((dist / window.innerHeight) * 100 + 120))}vh`;
+      sec.style.height = `${Math.max(150, Math.round((dist / window.innerHeight) * 100 + 115))}vh`;
       return dist;
     };
 
@@ -200,12 +236,12 @@ export default function ModelosShowcase() {
       track.style.transform = "";
       sec.style.height = "";
     };
-  }, [motionRev]);
+  }, [motionRev, modelosVisiveis.length, setorAtivo]);
 
   const irParaCard = (delta: number) => {
     const vp = viewportRef.current;
     const sec = secRef.current;
-    const total = MODELOS.length + 1;
+    const total = modelosVisiveis.length + 1;
     const alvo = Math.max(0, Math.min(total - 1, ativoIdx + delta));
     setAtivoIdx(alvo);
 
@@ -246,15 +282,15 @@ export default function ModelosShowcase() {
       <div className="modelos-palco">
         <header className="modelos-cabecalho">
           <div>
-            <p className="cota" data-only="dev">Câmara 03 · O Portal dos 10 Modelos · Cartuchos Interativos</p>
-            <p className="cota" data-only="empresa">Modelos prontos para adaptar ao seu negócio · 10 segmentos</p>
+            <p className="cota" data-only="dev">Cota +12,00 m · Portal dos 13 Modelos · Cartuchos Interativos</p>
+            <p className="cota" data-only="empresa">Modelos prontos para adaptar ao seu negócio · 13 segmentos</p>
             <h2 id="t-modelos" className="disp">
               Exemplos por área de atuação
             </h2>
           </div>
           <div className="modelos-ctrls">
             <span className="cota" aria-live="polite">
-              {String(Math.min(MODELOS.length, ativoIdx + 1)).padStart(2, "0")} / {MODELOS.length}
+              {String(Math.min(modelosVisiveis.length, ativoIdx + 1)).padStart(2, "0")} / {modelosVisiveis.length}
             </span>
             <button type="button" className="modelos-btn cota" onClick={() => irParaCard(-1)} aria-label="Modelo anterior">
               Anterior
@@ -265,11 +301,28 @@ export default function ModelosShowcase() {
           </div>
         </header>
 
+        <div className="modelos-filtros" role="group" aria-label="Filtrar modelos por setor">
+          {SETORES.map((setor) => {
+            const ativo = setorAtivo === setor;
+            return (
+              <button
+                key={setor}
+                type="button"
+                className={`modelos-filtro cota${ativo ? " ativo" : ""}`}
+                aria-pressed={ativo}
+                onClick={() => setSetorAtivo(setor)}
+              >
+                {setor}
+              </button>
+            );
+          })}
+        </div>
+
         <div
           ref={viewportRef}
           className="modelos-vp"
           tabIndex={0}
-          aria-label="Galeria dos 10 modelos de site. Use as setas esquerda e direita para navegar."
+          aria-label="Galeria dos 13 modelos de site. Use as setas esquerda e direita para navegar."
           onKeyDown={(e) => {
             if (e.key === "ArrowLeft") {
               e.preventDefault();
@@ -281,7 +334,7 @@ export default function ModelosShowcase() {
           }}
         >
           <div ref={trackRef} className="modelos-trilha">
-            {MODELOS.map((m, i) => (
+            {modelosVisiveis.map((m, i) => (
               <article
                 key={m.slug}
                 className="mod-card mod-card--tilt"
@@ -293,7 +346,7 @@ export default function ModelosShowcase() {
                   target="_blank"
                   rel="noopener noreferrer"
                   data-cursor="view"
-                  aria-label={`Modelo ${String(i + 1).padStart(2, "0")} ${m.nome}: ${m.conceito} Ver demonstração`}
+                  aria-label={`Modelo ${String(i + 1).padStart(2, "0")} ${m.nome}: ${m.conceito} Abrir demonstração`}
                 >
                   <div className="mod-card__topo">
                     <span className="mod-card__num disp" aria-hidden="true">
@@ -307,7 +360,7 @@ export default function ModelosShowcase() {
                   <div className="mod-card__base">
                     <h3 className="mod-card__nome disp">{m.nome}</h3>
                     <p className="mod-card__conc">{m.conceito}</p>
-                    <span className="mod-card__acao cota">Ver demonstração</span>
+                    <span className="mod-card__acao cota">Abrir demonstração</span>
                   </div>
                 </a>
               </article>
@@ -321,7 +374,7 @@ export default function ModelosShowcase() {
                 <CtaWhatsApp
                   camara="modelos"
                   compacto
-                  mensagem="Oi Daniel! Vi os 10 modelos no seu portfólio e quero conversar sobre um site para a minha empresa."
+                  mensagem="Oi Daniel! Vi os 13 modelos no seu portfólio e quero conversar sobre um site para a minha empresa."
                 />
                 <a
                   href={`${MODELOS_BASE_URL}/`}
@@ -333,6 +386,31 @@ export default function ModelosShowcase() {
                 </a>
               </div>
             </article>
+          </div>
+        </div>
+
+        <div className="modelos-demo-barra painel-chanfrado">
+          <p>
+            Quer ver um desses <strong>13 sistemas funcionando agora</strong> com o nome e as cores da sua empresa?
+          </p>
+          <div className="modelos-demo-barra__acoes">
+            <a
+              href={`${MODELOS_BASE_URL}/demo/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link-giz"
+              data-cursor="view"
+            >
+              Testar com o nome da minha loja (1 min)
+            </a>
+            <a
+              href={`${MODELOS_BASE_URL}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="modelos-btn cota"
+            >
+              Ver tabela de pacotes e preços
+            </a>
           </div>
         </div>
 

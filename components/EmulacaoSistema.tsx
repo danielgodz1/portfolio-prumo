@@ -16,6 +16,43 @@ const DADOS = {
   flowrequest: REQ,
 } as const;
 
+const TOOLTIPS_TEC = {
+  flowcheck: [
+    {
+      chave: "rls",
+      rotulo: "RLS no Supabase",
+      texto: "Row-Level Security isola filiais e perfis no PostgreSQL antes mesmo da resposta chegar no navegador.",
+    },
+    {
+      chave: "groq",
+      rotulo: "IA Groq (5W2H)",
+      texto: "Quando uma inspeção aponta Não Conforme, o backend sugere um plano 5W2H editável para aprovação da gestão.",
+    },
+    {
+      chave: "sha",
+      rotulo: "Hash SHA-256",
+      texto: "Cada relatório exportado em Excel ou PDF gera selo SHA-256 para conferir se houve alteração após a assinatura.",
+    },
+  ],
+  flowrequest: [
+    {
+      chave: "pin",
+      rotulo: "Homologação por link e PIN",
+      texto: "Quem recebe o material na ponta confirma pelo celular com PIN de 4 dígitos ou link único sem precisar criar senha.",
+    },
+    {
+      chave: "cron",
+      rotulo: "Auto-conclusão 48h",
+      texto: "Depois de entregue, o sistema conclui pedidos silenciosos em 48 horas para o saldo e relatórios não travarem em aberto.",
+    },
+    {
+      chave: "setor",
+      rotulo: "Auditoria por setor",
+      texto: "Cada transferência registra unidade, responsável e histórico em tempo real no dashboard da manutenção.",
+    },
+  ],
+} as const;
+
 const easeOut = (t: number) => 1 - Math.pow(1 - Math.min(1, Math.max(0, t)), 3);
 
 export default function EmulacaoSistema({ id }: Props) {
@@ -28,6 +65,7 @@ export default function EmulacaoSistema({ id }: Props) {
   const [manualStep, setManualStep] = useState<number | null>(null);
   const [planoAprovadoManual, setPlanoAprovadoManual] = useState(false);
   const [reqEnviadaManual, setReqEnviadaManual] = useState(false);
+  const [dicaAtiva, setDicaAtiva] = useState<string | null>(null);
   const [motionRev, setMotionRev] = useState(0);
   const manualRef = useRef<number | null>(null);
   manualRef.current = manualStep;
@@ -186,6 +224,30 @@ export default function EmulacaoSistema({ id }: Props) {
                 </button>
               );
             })}
+          </div>
+
+          <div className="emul__dicas" role="group" aria-label={`Detalhes técnicos de ${cfg.titulo}`}>
+            <div className="emul__dicas-btns">
+              {TOOLTIPS_TEC[id].map((tip) => {
+                const aberto = dicaAtiva === tip.chave;
+                return (
+                  <button
+                    key={tip.chave}
+                    type="button"
+                    className={`emul__dica-btn cota${aberto ? " ativo" : ""}`}
+                    aria-expanded={aberto}
+                    onClick={() => setDicaAtiva((prev) => (prev === tip.chave ? null : tip.chave))}
+                  >
+                    {tip.rotulo}
+                  </button>
+                );
+              })}
+            </div>
+            {dicaAtiva && (
+              <p className="emul__dica-painel" role="status">
+                {TOOLTIPS_TEC[id].find((t) => t.chave === dicaAtiva)?.texto}
+              </p>
+            )}
           </div>
 
           <div className="emul__rodape-texto">

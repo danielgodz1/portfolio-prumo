@@ -36,10 +36,10 @@ export default function NavegacaoTopo() {
           Império 3D
         </a>
         <a href="#camara-03" data-cursor="hover" data-swap>
-          10 Modelos
+          13 Modelos
         </a>
         <a href="#camara-04" data-cursor="hover" data-swap>
-          Infra &amp; Sobre
+          Infra &amp; Núcleo
         </a>
         <a href="#contato" data-cursor="hover" data-swap>
           Contato
@@ -50,7 +50,7 @@ export default function NavegacaoTopo() {
           Sistemas
         </a>
         <a href="#camara-03" data-cursor="hover">
-          10 Modelos
+          13 Modelos
         </a>
         <a href="#camara-02" data-cursor="hover">
           Império 3D

@@ -115,7 +115,7 @@ export default function SitesEmpresasJauPage() {
 
       <section aria-labelledby="exemplos-setor">
         <h2 id="exemplos-setor" className="disp">
-          10 demonstrações prontas por segmento
+          13 demonstrações prontas por segmento
         </h2>
         <div className="subpag__cards">
           {MODELOS.slice(0, 6).map((m) => (
