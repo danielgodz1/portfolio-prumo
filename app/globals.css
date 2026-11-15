@@ -537,3 +537,40 @@ html.modo-2d .ato-z__profundidade, html.reduzir .ato-z__profundidade { transform
   .hud-min__btn { font-size: .68rem; padding: 0 .55rem; }
 }
 .lab-demo__btn { min-height: 44px; padding: .4rem .9rem; background: var(--giz); color: var(--grafite); border: 0; font-weight: 700; cursor: pointer; }
+
+/* BOTÃO DE ÁUDIO ESPACIAL NO HERO */
+.hero-som-btn {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .45rem .95rem;
+  border: 1px solid rgb(125 211 252 / .45);
+  border-radius: 999px;
+  background: rgb(3 9 27 / .72);
+  color: var(--papel);
+  font-size: .78rem;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: border-color .2s, background .2s, color .2s;
+}
+.hero-som-btn:hover,
+.hero-som-btn:focus-visible {
+  border-color: var(--giz);
+  color: var(--giz);
+}
+.hero-som-btn.is-ativo {
+  border-color: var(--giz);
+  background: rgb(255 210 63 / .14);
+  color: var(--giz);
+}
+.hero-som-btn__led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgb(236 238 240 / .5);
+}
+.hero-som-btn.is-ativo .hero-som-btn__led {
+  background: var(--giz);
+  box-shadow: 0 0 10px var(--giz);
+}

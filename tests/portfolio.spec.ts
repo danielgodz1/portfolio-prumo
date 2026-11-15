@@ -45,14 +45,26 @@ test.describe("portfolio-prumo — Awwwards Scrollytelling Z, Empresas, Devs & S
     await expect(canvas).toBeVisible({ timeout: 12_000 });
     await expect.poll(async () => (await canvas.boundingBox())?.width ?? 0, { timeout: 10_000 }).toBeGreaterThan(800);
 
-    await page.waitForTimeout(450);
-    await shot(page, "01-hero-awwwards.png");
+    // Verifica botão de áudio espacial no Hero sincronizado com o HUD
+    const somHero = page.locator(".hero-som-btn").first();
+    await expect(somHero).toBeVisible();
+    await somHero.click();
+    await expect(somHero).toContainText("Áudio espacial: Ligado");
+    await expect(page.locator(".hud-min")).toContainText("Som: On");
 
-    // Verifica Ato 01 em profundidade Z durante a rolagem
+    await page.waitForTimeout(750);
+    await shot(page, "01-hero-terra-foguete.png");
+
+    // Verifica Ato 01 em profundidade Z e atualização planetária no HUD
     await page.locator("#ato-01").scrollIntoViewIfNeeded();
     await page.evaluate(() => window.scrollBy(0, 320));
-    await page.waitForTimeout(400);
-    await shot(page, "02-ato01-profundidade-z.png");
+    await page.waitForTimeout(550);
+    await shot(page, "02-ato01-mercurio-venus.png");
+
+    // Verifica Ato 04 próximo a Saturno com anéis
+    await page.locator("#ato-04").scrollIntoViewIfNeeded();
+    await page.waitForTimeout(600);
+    await shot(page, "03-saturno-foguete.png");
 
     // Alterna para perfil dev/recrutador
     await page.evaluate(() => window.scrollTo(0, 0));

@@ -16,6 +16,7 @@ import AudienciaSwitch from "../components/AudienciaSwitch";
 import CtaWhatsApp from "../components/CtaWhatsApp";
 import TransicaoLiquida from "../components/TransicaoLiquida";
 import AtoProfundidadeZ from "../components/AtoProfundidadeZ";
+import BotaoSomHero from "../components/BotaoSomHero";
 
 export default function Page() {
   const projetosNucleo = PROJETOS.filter((p) => p.id !== "imperio");
@@ -89,8 +90,9 @@ export default function Page() {
                   mensagem="Oi Daniel! Vi o seu site novo e quero conversar sobre um projeto para a minha empresa."
                 />
                 <a href="#ato-01" className="hero-palco__scroll" data-cursor="hover">
-                  Ver a história se montando
+                  Decolar pelos 8 planetas
                 </a>
+                <BotaoSomHero />
               </div>
               <div data-only="dev" className="hero-palco__cta-linha">
                 <a href="#projetos" className="hero__cta hero__cta--prim" data-mag data-cursor="hover">
@@ -102,6 +104,7 @@ export default function Page() {
                 <a href="#contato" className="hero__cta hero__cta--sec" data-cursor="hover">
                   Contato
                 </a>
+                <BotaoSomHero />
               </div>
             </div>
 
@@ -113,7 +116,7 @@ export default function Page() {
         <AtoProfundidadeZ
           id="ato-01"
           className="ord-ato01"
-          ato="ATO 01 · +0,00 m -> +3,00 m · A FUNDAÇÃO"
+          ato="ATO 01 · +0,00 m · TERRA A MERCÚRIO · A FUNDAÇÃO"
           titulo="Tudo começou resolvendo problema real no chão de operação."
           subtitulo="Antes de qualquer linha de código virar efeito 3D, ela precisava tirar papel perdido da mão da equipe, evitar pedido atrasado e dar visibilidade para quem decide."
         >
@@ -128,7 +131,7 @@ export default function Page() {
         <AtoProfundidadeZ
           id="ato-02"
           className="ord-ato02"
-          ato="ATO 02 · +3,00 m -> +6,00 m · SISTEMAS NO AR"
+          ato="ATO 02 · +3,00 m · VÊNUS A MARTE · SISTEMAS NO AR"
           titulo="Ferramentas que saíram do papel para o celular da equipe."
           subtitulo="FlowCheck e FlowRequest foram construídos para uso diário real: checklist de campo com plano de ação e requisição de materiais do pedido à conclusão."
         />
@@ -200,7 +203,7 @@ export default function Page() {
         <AtoProfundidadeZ
           id="ato-03"
           className="ord-ato03"
-          ato="ATO 03 · +6,00 m -> +9,00 m · ARQUITETURA 3D"
+          ato="ATO 03 · +6,00 m · ÓRBITA DE JÚPITER · ARQUITETURA 3D"
           titulo="Depois a planta baixa virou um quarto 3D se montando diante de você."
           subtitulo="Para a Império Móveis Planejados de Jaú, o site nasceu como extensão da marcenaria: do traço inicial até acender os perfis de LED 2700K."
         />
@@ -245,7 +248,7 @@ export default function Page() {
         <AtoProfundidadeZ
           id="ato-04"
           className="ord-ato04"
-          ato="ATO 04 · +9,00 m -> +12,00 m · PARA O SEU NEGÓCIO"
+          ato="ATO 04 · +9,00 m · SATURNO A NETUNO · PARA O SEU NEGÓCIO"
           titulo="Agora escolha o ponto de partida da sua empresa."
           subtitulo="Dez segmentos com identidade visual própria e navegação imediata. Você testa ao vivo e me chama direto no WhatsApp."
         />

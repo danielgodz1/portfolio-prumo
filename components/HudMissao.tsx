@@ -1,14 +1,15 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { S } from "../lib/store";
-import { definirSom, lerSomPreferencia } from "../lib/som";
+import { definirSom, lerSomPreferencia, tocarIgnicao } from "../lib/som";
 
-/** Barra minimalista de cota e controles de acessibilidade (movimento e som). */
+/** Barra minimalista de telemetria planetária, cota e acessibilidade (movimento e som). */
 export default function HudMissao() {
   const [som, setSom] = useState(false);
   const [reduzido, setReduzido] = useState(false);
   const [oculto, setOculto] = useState(false);
-  const [cotaTexto, setCotaTexto] = useState("+0,00 m · INÍCIO");
+  const planetaRef = useRef({ idx: 0, nome: "Terra · Jaú/SP" });
+  const [cotaTexto, setCotaTexto] = useState("+0,00 m · PLANETA 01/08 · TERRA · JAÚ/SP");
   const [cotaAnuncio, setCotaAnuncio] = useState("");
 
   useEffect(() => {
@@ -25,15 +26,26 @@ export default function HudMissao() {
       const custom = e as CustomEvent<{ degrau: number; texto: string }>;
       if (custom.detail?.texto) setCotaAnuncio(custom.detail.texto);
     };
+    const onPlanetaEvent = (e: Event) => {
+      const custom = e as CustomEvent<{ idx: number; nome: string; papel: string }>;
+      if (typeof custom.detail?.idx === "number") {
+        planetaRef.current = { idx: custom.detail.idx, nome: custom.detail.nome };
+      }
+    };
+    const onSomEvent = (e: Event) => {
+      const custom = e as CustomEvent<{ som: boolean }>;
+      setSom(Boolean(custom.detail?.som));
+    };
+
     window.addEventListener("prumo:motion", onMotionEvent);
     window.addEventListener("prumo:cota", onCotaEvent);
+    window.addEventListener("prumo:planeta", onPlanetaEvent);
+    window.addEventListener("prumo:som", onSomEvent);
 
     const id = window.setInterval(() => {
-      const p = S.progress;
       const m = S.cotaMeters;
-      const ato =
-        p < 0.2 ? "INÍCIO" : p < 0.44 ? "ATO 01 · JAÚ" : p < 0.66 ? "ATO 02 · SISTEMAS" : p < 0.86 ? "ATO 03 · 3D" : "ATO 04 · MODELOS";
-      const next = `+${m.toFixed(2).replace(".", ",")} m · ${ato}`;
+      const numStr = String(planetaRef.current.idx + 1).padStart(2, "0");
+      const next = `+${m.toFixed(2).replace(".", ",")} m · PLANETA ${numStr}/08 · ${planetaRef.current.nome.toUpperCase()}`;
       setCotaTexto((prev) => (prev === next ? prev : next));
     }, 110);
 
@@ -45,6 +57,8 @@ export default function HudMissao() {
       window.clearInterval(id);
       window.removeEventListener("prumo:motion", onMotionEvent);
       window.removeEventListener("prumo:cota", onCotaEvent);
+      window.removeEventListener("prumo:planeta", onPlanetaEvent);
+      window.removeEventListener("prumo:som", onSomEvent);
       io?.disconnect();
     };
   }, []);
@@ -53,6 +67,8 @@ export default function HudMissao() {
     const prox = !som;
     S.sound = definirSom(prox);
     setSom(prox);
+    if (prox) tocarIgnicao();
+    window.dispatchEvent(new CustomEvent("prumo:som", { detail: { som: prox } }));
   }, [som]);
 
   const alternarMovimento = useCallback(() => {
@@ -73,7 +89,7 @@ export default function HudMissao() {
   }, [reduzido]);
 
   return (
-    <aside className={`hud-min cota${oculto ? " is-oculto" : ""}`} aria-label="Cota e controles de acessibilidade">
+    <aside className={`hud-min cota${oculto ? " is-oculto" : ""}`} aria-label="Telemetria espacial, cota e acessibilidade">
       <span className="hud-min__cota" aria-live="off">
         {cotaTexto}
       </span>
@@ -95,7 +111,7 @@ export default function HudMissao() {
           className="hud-min__btn"
           onClick={alternarSom}
           aria-pressed={som}
-          aria-label={som ? "Silenciar cliques por cota" : "Ativar som sutil por cota"}
+          aria-label={som ? "Silenciar áudio espacial e propulsão" : "Ativar áudio espacial e som do foguete"}
         >
           {som ? "Som: On" : "Som: Off"}
         </button>

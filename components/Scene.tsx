@@ -7,12 +7,8 @@ import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { S } from "../lib/store";
 import QuartoImperio, { QUARTO_ORIGEM } from "./QuartoImperio";
-import GloboLusion from "./mundo/GloboLusion";
-import SalaNucleo from "./mundo/SalaNucleo";
-import PortalModelos3D from "./mundo/PortalModelos3D";
-import ReliquiaKernel from "./mundo/ReliquiaKernel";
-import NaviKernel3D from "./mundo/NaviKernel3D";
-import MonolitoPrumo from "./mundo/MonolitoPrumo";
+import SistemaSolar from "./mundo/SistemaSolar";
+import FogueteEspacial from "./mundo/FogueteEspacial";
 
 const GradeShockShader = dynamic(() => import("./GradeShockShader"), { ssr: false });
 
@@ -53,14 +49,14 @@ function PrumoPendulo() {
 }
 
 const CORES_ATMOS = [
-  new THREE.Color("#03091B"), // 00 Globo Orbital
-  new THREE.Color("#041118"), // 01 Sala do Núcleo
-  new THREE.Color("#08142C"), // 02 Império 3D
-  new THREE.Color("#09071A"), // 03 Portal Modelos
-  new THREE.Color("#07060F"), // 04 Memory Dump / Kernel
+  new THREE.Color("#020714"), // 00 Terra · Órbita Jaú/SP
+  new THREE.Color("#040d1d"), // 01 Mercúrio & Vênus
+  new THREE.Color("#071328"), // 02 Marte & Júpiter + Império 3D
+  new THREE.Color("#08091b"), // 03 Saturno & Urano
+  new THREE.Color("#050a18"), // 04 Netuno · Espaço Profundo
 ];
 
-/** Câmera contínua em CatmullRomCurve3 atravessando as 5 Câmaras + dolly-in na Império 3D. */
+/** Câmera contínua acompanhando o foguete pelos 8 planetas + dolly-in na Império 3D. */
 function CameraMundo() {
   const { scene } = useThree();
   const prog = useRef(0);
@@ -70,12 +66,14 @@ function CameraMundo() {
   const curvaPos = useMemo(
     () =>
       new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, 0.35, 7.6), // 00 Hero Monólito & Globo
-        new THREE.Vector3(0, 0.45, -16.5), // 01 Túnel Fundação
-        new THREE.Vector3(0, 0.55, -40.0), // 01 Núcleo Sistemas
-        new THREE.Vector3(-2.4, 5.2, -56.0), // 02 Império 3D
-        new THREE.Vector3(0, 1.8, -82.0), // 03 Portal Modelos
-        new THREE.Vector3(0.8, 2.2, -110.5), // 04 Relíquia & Kernel
+        new THREE.Vector3(0.35, 0.28, 6.8), // 00 Terra + Foguete
+        new THREE.Vector3(-0.25, 0.55, -11.5), // 01 Mercúrio
+        new THREE.Vector3(0.25, 0.1, -28.0), // 02 Vênus
+        new THREE.Vector3(-0.15, 0.2, -45.0), // 03 Marte
+        new THREE.Vector3(-2.1, 4.7, -56.5), // 04 Júpiter & Império 3D
+        new THREE.Vector3(0.45, 1.35, -83.5), // 05 Saturno com anéis
+        new THREE.Vector3(-0.3, 0.15, -102.5), // 06 Urano
+        new THREE.Vector3(0.35, 0.35, -122.0), // 07 Netuno
       ]),
     [],
   );
@@ -83,12 +81,14 @@ function CameraMundo() {
   const curvaAlvo = useMemo(
     () =>
       new THREE.CatmullRomCurve3([
-        new THREE.Vector3(1.4, 0.05, -0.5), // 00 Enquadra Monólito + Globo à direita
-        new THREE.Vector3(0, 0.25, -34.0), // 01 Olha pelo túnel
-        new THREE.Vector3(0, 0.3, -58.0), // 01 Fundo do núcleo
-        new THREE.Vector3(0, 1.0, -68.0), // 02 Palco Império
-        new THREE.Vector3(0, 1.6, -102.0), // 03 Corredor portais
-        new THREE.Vector3(2.4, 2.2, -122.0), // 04 Relíquia Triforce
+        new THREE.Vector3(1.45, -0.15, -0.5),
+        new THREE.Vector3(-1.55, 0.35, -18.5),
+        new THREE.Vector3(1.65, -0.25, -35.5),
+        new THREE.Vector3(-1.6, 0.15, -52.5),
+        new THREE.Vector3(0.9, 0.9, -70.0),
+        new THREE.Vector3(-2.1, 0.25, -94.5),
+        new THREE.Vector3(1.8, -0.25, -113.5),
+        new THREE.Vector3(-1.2, 0.2, -132.5),
       ]),
     [],
   );
@@ -96,11 +96,14 @@ function CameraMundo() {
   const curvaPosEmp = useMemo(
     () =>
       new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, 0.35, 7.6), // Ato 00 Hero Monólito
-        new THREE.Vector3(0, 0.4, -14.5), // Ato 01 Origem Jaú / Túnel
-        new THREE.Vector3(0, 0.5, -36.0), // Ato 02 Sistemas reais
-        new THREE.Vector3(-2.4, 4.9, -56.5), // Ato 03 Império 3D se montando
-        new THREE.Vector3(0, 1.8, -82.0), // Ato 04 10 Modelos & Contato
+        new THREE.Vector3(0.35, 0.28, 6.8),
+        new THREE.Vector3(-0.25, 0.55, -11.5),
+        new THREE.Vector3(0.25, 0.1, -28.0),
+        new THREE.Vector3(-0.15, 0.2, -45.0),
+        new THREE.Vector3(-2.1, 4.7, -56.5),
+        new THREE.Vector3(0.45, 1.35, -83.5),
+        new THREE.Vector3(-0.3, 0.15, -102.5),
+        new THREE.Vector3(0.35, 0.35, -122.0),
       ]),
     [],
   );
@@ -108,11 +111,14 @@ function CameraMundo() {
   const curvaAlvoEmp = useMemo(
     () =>
       new THREE.CatmullRomCurve3([
-        new THREE.Vector3(1.4, 0.05, -0.5),
-        new THREE.Vector3(0, 0.2, -32.0),
-        new THREE.Vector3(0, 0.3, -55.0),
-        new THREE.Vector3(0, 1.0, -68.0),
-        new THREE.Vector3(0, 1.6, -102.0),
+        new THREE.Vector3(1.45, -0.15, -0.5),
+        new THREE.Vector3(-1.55, 0.35, -18.5),
+        new THREE.Vector3(1.65, -0.25, -35.5),
+        new THREE.Vector3(-1.6, 0.15, -52.5),
+        new THREE.Vector3(0.9, 0.9, -70.0),
+        new THREE.Vector3(-2.1, 0.25, -94.5),
+        new THREE.Vector3(1.8, -0.25, -113.5),
+        new THREE.Vector3(-1.2, 0.2, -132.5),
       ]),
     [],
   );
@@ -121,13 +127,13 @@ function CameraMundo() {
   const aMundo = useMemo(() => new THREE.Vector3(), []);
   const pQuarto = useMemo(() => new THREE.Vector3(), []);
   const aQuarto = useMemo(() => new THREE.Vector3(), []);
-  const pJau = useMemo(() => new THREE.Vector3(2.4, 0.1, 4.9), []);
-  const aJau = useMemo(() => new THREE.Vector3(3.4, -0.35, -1.2), []);
-  const bgCor = useMemo(() => new THREE.Color("#03091B"), []);
+  const pJau = useMemo(() => new THREE.Vector3(2.2, 0.05, 3.8), []);
+  const aJau = useMemo(() => new THREE.Vector3(2.35, -0.05, -0.5), []);
+  const bgCor = useMemo(() => new THREE.Color("#020714"), []);
 
-  if (!scene.background) scene.background = new THREE.Color("#03091B");
+  if (!scene.background) scene.background = new THREE.Color("#020714");
   if (!(scene.fog instanceof THREE.FogExp2)) {
-    scene.fog = new THREE.FogExp2("#03091B", 0.022);
+    scene.fog = new THREE.FogExp2("#020714", 0.0055);
   }
 
   useFrame(({ camera }, dt0) => {
@@ -136,7 +142,7 @@ function CameraMundo() {
     prog.current += (S.progress - prog.current) * k;
     const u = THREE.MathUtils.clamp(prog.current, 0, 1);
 
-    // Atualiza cor do fundo + FogExp2 conforme a câmara atual
+    // Atualiza cor do fundo + névoa leve espacial para não esconder planetas distantes
     const fIdx = u * 4;
     const i0 = Math.min(3, Math.floor(fIdx));
     const frac = fIdx - i0;
@@ -144,7 +150,7 @@ function CameraMundo() {
     (scene.background as THREE.Color).copy(bgCor);
     if (scene.fog instanceof THREE.FogExp2) {
       scene.fog.color.copy(bgCor);
-      scene.fog.density = THREE.MathUtils.lerp(0.02, 0.032, S.camara === 1 ? 1 : 0.25);
+      scene.fog.density = THREE.MathUtils.lerp(0.0052, 0.0072, S.camara === 1 ? 1 : 0.35);
     }
 
     const alvoBoost = S.reduced ? 0 : THREE.MathUtils.clamp(Math.abs(S.vel) / 42, 0, 1);
@@ -294,12 +300,12 @@ export default function Scene() {
 
   return (
     <Canvas
-      aria-label="Mundo 3D contínuo com globo orbital, prumo, sala de sistemas, maquete da Império e portais"
+      aria-label="Mundo 3D contínuo com os 8 planetas do Sistema Solar em texturas reais da NASA, foguete espacial e maquete da Império"
       eventSource={evSource}
       eventPrefix="client"
       dpr={mobile || softGpu ? [1, 1.2] : [1, 1.65]}
       frameloop={pausado ? "never" : reduzido ? "demand" : "always"}
-      camera={{ fov: 48, position: [0, 0.35, 10.8], near: 0.1, far: 180 }}
+      camera={{ fov: 48, position: [0.35, 0.28, 6.8], near: 0.1, far: 340 }}
       gl={{ antialias: !mobile && !softGpu, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
         S.webgl = true;
@@ -319,27 +325,26 @@ export default function Scene() {
       style={{ position: "fixed", inset: 0, width: "100%", height: "100%" }}
     >
       <Environment resolution={256} frames={1}>
-        <mesh scale={140}>
+        <mesh scale={160}>
           <sphereGeometry args={[1, 18, 18]} />
-          <meshBasicMaterial color="#0b1f54" side={THREE.BackSide} />
+          <meshBasicMaterial color="#071535" side={THREE.BackSide} />
         </mesh>
-        <Lightformer form="rect" intensity={5.5} position={[0, 8, 5]} scale={[14, 3, 1]} color="#7ec8ff" />
-        <Lightformer form="rect" intensity={3.2} position={[-8, 2, -25]} scale={[4, 10, 1]} color="#00ff9c" />
-        <Lightformer form="rect" intensity={3.5} position={[6, 3, -68]} scale={[5, 8, 1]} color="#ffd27a" />
+        <Lightformer form="rect" intensity={5.2} position={[-6, 8, 8]} scale={[16, 4, 1]} color="#fff1d6" />
+        <Lightformer form="rect" intensity={3.2} position={[8, 2, -35]} scale={[6, 12, 1]} color="#7dd3fc" />
+        <Lightformer form="rect" intensity={3.6} position={[6, 3, -72]} scale={[6, 8, 1]} color="#ffd27a" />
       </Environment>
 
-      <ambientLight intensity={0.48} />
-      <directionalLight position={[6, 8, 10]} intensity={2.2} color="#b9dcff" />
+      <ambientLight intensity={0.42} />
+      <directionalLight position={[-12, 8, 16]} intensity={2.6} color="#fff7e6" />
+      <directionalLight position={[10, -4, -30]} intensity={0.95} color="#38bdf8" />
 
       <CameraMundo />
       <PrumoPendulo />
-      <MonolitoPrumo />
-      <GloboLusion />
-      <SalaNucleo />
+      <Suspense fallback={null}>
+        <SistemaSolar />
+        <FogueteEspacial />
+      </Suspense>
       <QuartoImperio />
-      <PortalModelos3D />
-      <ReliquiaKernel />
-      <NaviKernel3D />
       <Suspense fallback={null}>
         <GradeShockShader />
       </Suspense>
