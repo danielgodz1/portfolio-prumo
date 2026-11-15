@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useRef } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
+import { Html } from "@react-three/drei";
 import * as THREE from "three";
 import { S } from "../../lib/store";
 import { tocarCliqueCota } from "../../lib/som";
@@ -8,13 +9,17 @@ import { obterSpriteParticulaCircular } from "../../lib/particulaSprite";
 
 export interface PlanetaSpec {
   id: string;
+  ordem: string;
   nome: string;
   papel: string;
+  techEmpresa: string;
+  techDev: string;
   pos: [number, number, number];
   raio: number;
   tex: string;
   corAtmos: string;
   velocidade: number;
+  bumpScale?: number;
   aneis?: { inner: number; outer: number; inclinaX: number; inclinaZ: number; cor: string; usarTexSaturno?: boolean };
   luas?: { raio: number; dist: number; vel: number; cor: string }[];
 }
@@ -22,8 +27,11 @@ export interface PlanetaSpec {
 export const PLANETAS: PlanetaSpec[] = [
   {
     id: "terra",
+    ordem: "01",
     nome: "Terra · Jaú/SP",
     papel: "Ponto de partida",
+    techEmpresa: "Origem em Jaú/SP · Atendimento direto",
+    techDev: "Núcleo Central · Next.js 15 & WebGL",
     pos: [2.65, -0.05, -0.5],
     raio: 2.35,
     tex: "/texturas/planetas/2k_earth_daymap.jpg",
@@ -32,38 +40,53 @@ export const PLANETAS: PlanetaSpec[] = [
   },
   {
     id: "mercurio",
+    ordem: "02",
     nome: "Mercúrio",
     papel: "A Fundação",
+    techEmpresa: "Servidores, rede segura e operação no ar",
+    techDev: "Windows Server · Hyper-V · MikroTik",
     pos: [-2.8, 0.6, -19],
     raio: 1.35,
     tex: "/texturas/planetas/2k_mercury.jpg",
     corAtmos: "#ffd23f",
     velocidade: 0.09,
+    bumpScale: 0.085,
   },
   {
     id: "venus",
+    ordem: "03",
     nome: "Vênus",
     papel: "FlowCheck",
+    techEmpresa: "Checklists de campo com foto no celular",
+    techDev: "FlowCheck · React 19 · Supabase · IA",
     pos: [3.1, -0.4, -36],
     raio: 1.85,
-    tex: "/texturas/planetas/2k_venus_atmosphere.jpg",
+    tex: "/texturas/planetas/2k_venus_surface.jpg",
     corAtmos: "#fbbf24",
     velocidade: 0.06,
+    bumpScale: 0.065,
   },
   {
     id: "marte",
+    ordem: "04",
     nome: "Marte",
     papel: "FlowRequest",
+    techEmpresa: "Pedidos da equipe até a entrega sem extravio",
+    techDev: "FlowRequest · TanStack · Telemetria IoT",
     pos: [-3.0, 0.25, -53],
     raio: 1.6,
     tex: "/texturas/planetas/2k_mars.jpg",
     corAtmos: "#fb7185",
     velocidade: 0.08,
+    bumpScale: 0.09,
   },
   {
     id: "jupiter",
+    ordem: "05",
     nome: "Júpiter",
     papel: "Império 3D",
+    techEmpresa: "Maquete 3D no navegador · Império Móveis",
+    techDev: "Three.js · Shaders GLSL · GSAP",
     pos: [4.2, 0.8, -74],
     raio: 3.35,
     tex: "/texturas/planetas/2k_jupiter.jpg",
@@ -77,8 +100,11 @@ export const PLANETAS: PlanetaSpec[] = [
   },
   {
     id: "saturno",
+    ordem: "06",
     nome: "Saturno",
     papel: "10 Modelos",
+    techEmpresa: "10 sites prontos para escolher o seu ramo",
+    techDev: "Sites Interativos · 10 Modelos · Conversão",
     pos: [-3.9, 0.3, -95],
     raio: 2.65,
     tex: "/texturas/planetas/2k_saturn.jpg",
@@ -95,8 +121,11 @@ export const PLANETAS: PlanetaSpec[] = [
   },
   {
     id: "urano",
+    ordem: "07",
     nome: "Urano",
-    papel: "Transição",
+    papel: "Monitoramento",
+    techEmpresa: "Segurança e alertas 24h nos seus sistemas",
+    techDev: "Wazuh SIEM · Zabbix · Sensores & VPN",
     pos: [3.4, -0.4, -114],
     raio: 2.0,
     tex: "/texturas/planetas/2k_uranus.jpg",
@@ -112,8 +141,11 @@ export const PLANETAS: PlanetaSpec[] = [
   },
   {
     id: "netuno",
+    ordem: "08",
     nome: "Netuno",
     papel: "Contato Final",
+    techEmpresa: "Projeto sob medida conectado ao WhatsApp",
+    techDev: "TOTVS RM · APIs · Automação & Entrega",
     pos: [-2.4, 0.2, -133],
     raio: 2.15,
     tex: "/texturas/planetas/2k_neptune.jpg",
@@ -161,6 +193,7 @@ function PlanetaComVFX({
   texMap,
   texNuvensTerra,
   texNoiteTerra,
+  texVenusAtmos,
   texLua,
   texAnelSaturno,
 }: {
@@ -168,15 +201,19 @@ function PlanetaComVFX({
   texMap: THREE.Texture;
   texNuvensTerra?: THREE.Texture;
   texNoiteTerra?: THREE.Texture;
+  texVenusAtmos?: THREE.Texture;
   texLua?: THREE.Texture;
   texAnelSaturno?: THREE.Texture;
 }) {
   const grpRef = useRef<THREE.Group>(null);
   const esferaRef = useRef<THREE.Mesh>(null);
   const nuvensRef = useRef<THREE.Mesh>(null);
+  const venusAtmosRef = useRef<THREE.Mesh>(null);
   const luaRef = useRef<THREE.Mesh>(null);
   const luasGrpRef = useRef<THREE.Group>(null);
   const vfxParticlesRef = useRef<THREE.Points>(null);
+  const tagRef = useRef<HTMLDivElement>(null);
+  const techSpanRef = useRef<HTMLSpanElement>(null);
 
   const atmosUniforms = useMemo(
     () => ({
@@ -229,9 +266,19 @@ function PlanetaComVFX({
     const dt = Math.min(dt0, 0.05);
     const t = state.clock.elapsedTime;
     if (grpRef.current) {
-      // Economiza draw calls longe da câmera
+      // Economiza draw calls longe da câmera e controla visibilidade do rótulo do planeta em foco
       const dz = Math.abs(grpRef.current.position.z - state.camera.position.z);
+      const frente = state.camera.position.z - grpRef.current.position.z;
       grpRef.current.visible = dz < 75;
+      if (tagRef.current) {
+        const mostrarTag = frente > -1.5 && frente < 18 && !S.modo2D && S.quartoActive < 0.35;
+        tagRef.current.style.opacity = mostrarTag ? String(THREE.MathUtils.clamp((18 - frente) / 6, 0, 1)) : "0";
+        tagRef.current.style.display = mostrarTag ? "grid" : "none";
+        if (mostrarTag && techSpanRef.current) {
+          const txt = S.audiencia === "dev" ? spec.techDev : spec.techEmpresa;
+          if (techSpanRef.current.textContent !== txt) techSpanRef.current.textContent = txt;
+        }
+      }
       if (!grpRef.current.visible) return;
     }
 
@@ -240,6 +287,9 @@ function PlanetaComVFX({
     }
     if (nuvensRef.current && !S.reduced) {
       nuvensRef.current.rotation.y += dt * 0.085;
+    }
+    if (venusAtmosRef.current && !S.reduced) {
+      venusAtmosRef.current.rotation.y += dt * 0.11;
     }
     if (luaRef.current && !S.reduced) {
       const a = t * 0.35;
@@ -258,7 +308,7 @@ function PlanetaComVFX({
     if (spec.id !== "terra") return;
     S.globoFocus = 1;
     S.shockwave = 1;
-    S.shockOriginX = 2.35;
+    S.shockOriginX = 2.65;
     S.shockOriginZ = -0.5;
     tocarCliqueCota(0);
     window.dispatchEvent(new CustomEvent("prumo:jau-easter-egg"));
@@ -270,11 +320,13 @@ function PlanetaComVFX({
         <sphereGeometry args={[spec.raio, 56, 56]} />
         <meshStandardMaterial
           map={texMap}
+          bumpMap={spec.bumpScale ? texMap : undefined}
+          bumpScale={spec.bumpScale ?? 0}
           emissiveMap={spec.id === "terra" ? texNoiteTerra : undefined}
-          emissive={spec.id === "terra" ? new THREE.Color("#ffd27a") : new THREE.Color(spec.corAtmos)}
-          emissiveIntensity={spec.id === "terra" ? 0.55 : 0.08}
-          roughness={spec.id === "terra" ? 0.65 : 0.78}
-          metalness={0.08}
+          emissive={spec.id === "terra" ? new THREE.Color("#ffd27a") : new THREE.Color("#000000")}
+          emissiveIntensity={spec.id === "terra" ? 0.52 : 0}
+          roughness={spec.id === "terra" ? 0.56 : spec.id === "urano" || spec.id === "netuno" ? 0.62 : 0.78}
+          metalness={spec.id === "terra" ? 0.14 : 0.05}
         />
 
         {/* Marcador Jaú/SP girando junto à Terra */}
@@ -312,6 +364,20 @@ function PlanetaComVFX({
         </mesh>
       )}
 
+      {/* Atmosfera espessa giratória de Vênus sobre a superfície Magellan */}
+      {spec.id === "venus" && texVenusAtmos && (
+        <mesh ref={venusAtmosRef}>
+          <sphereGeometry args={[spec.raio * 1.028, 48, 48]} />
+          <meshStandardMaterial
+            map={texVenusAtmos}
+            transparent
+            opacity={0.62}
+            roughness={0.7}
+            depthWrite={false}
+          />
+        </mesh>
+      )}
+
       {/* Halo Atmosférico Fresnel GLSL suave */}
       <mesh>
         <sphereGeometry args={[spec.raio * 1.18, 42, 42]} />
@@ -326,11 +392,11 @@ function PlanetaComVFX({
         />
       </mesh>
 
-      {/* Lua orbitando a Terra */}
+      {/* Lua orbitando a Terra com relevo de crateras */}
       {spec.id === "terra" && texLua && (
         <mesh ref={luaRef} position={[3.85, 0.3, 0]}>
           <sphereGeometry args={[0.42, 32, 32]} />
-          <meshStandardMaterial map={texLua} roughness={0.92} />
+          <meshStandardMaterial map={texLua} bumpMap={texLua} bumpScale={0.095} roughness={0.92} />
         </mesh>
       )}
 
@@ -376,6 +442,25 @@ function PlanetaComVFX({
           depthWrite={false}
         />
       </points>
+
+      {/* Placa espacial flutuante com nome do planeta e stack conectada */}
+      <Html
+        position={[spec.id === "terra" ? 0.3 : 0, spec.id === "terra" ? spec.raio * 0.72 : spec.raio + 0.35, 0.9]}
+        center
+        zIndexRange={[2, 8]}
+        style={{ pointerEvents: "none" }}
+      >
+        <div ref={tagRef} className="planeta-tag" style={{ display: "none", opacity: 0 }}>
+          <span className="planeta-tag__topo cota">
+            <i aria-hidden="true" style={{ background: spec.corAtmos }} />
+            PLANETA {spec.ordem} · {spec.nome}
+          </span>
+          <strong className="planeta-tag__papel">{spec.papel}</strong>
+          <span ref={techSpanRef} className="planeta-tag__tech cota">
+            {spec.techEmpresa}
+          </span>
+        </div>
+      </Html>
     </group>
   );
 }
@@ -401,6 +486,7 @@ export default function SistemaSolar() {
     "/texturas/planetas/2k_uranus.jpg", // 10
     "/texturas/planetas/2k_neptune.jpg", // 11
     "/texturas/planetas/2k_stars_milky_way.jpg", // 12
+    "/texturas/planetas/2k_venus_surface.jpg", // 13
   ]);
 
   texturas.forEach((tx, idx) => {
@@ -410,12 +496,11 @@ export default function SistemaSolar() {
   const mapById: Record<string, THREE.Texture> = {
     terra: texturas[0],
     mercurio: texturas[4],
-    venus: texturas[5],
+    venus: texturas[13],
     marte: texturas[6],
     jupiter: texturas[7],
     saturno: texturas[8],
     urano: texturas[10],
-    neptune_alt: texturas[11],
     netuno: texturas[11],
   };
 
@@ -478,6 +563,7 @@ export default function SistemaSolar() {
           texMap={mapById[spec.id]}
           texNuvensTerra={spec.id === "terra" ? texturas[2] : undefined}
           texNoiteTerra={spec.id === "terra" ? texturas[1] : undefined}
+          texVenusAtmos={spec.id === "venus" ? texturas[5] : undefined}
           texLua={spec.id === "terra" ? texturas[3] : undefined}
           texAnelSaturno={spec.id === "saturno" ? texturas[9] : undefined}
         />

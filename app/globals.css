@@ -574,3 +574,70 @@ html.modo-2d .ato-z__profundidade, html.reduzir .ato-z__profundidade { transform
   background: var(--giz);
   box-shadow: 0 0 10px var(--giz);
 }
+
+/* TELEMETRIA 3D DOS PLANETAS E PACOTES NOS CABOS */
+.planeta-tag {
+  display: grid;
+  gap: .2rem;
+  min-width: 14rem;
+  max-width: 19rem;
+  padding: .55rem .8rem;
+  background: rgb(3 9 27 / .84);
+  border: 1px solid rgb(125 211 252 / .36);
+  border-left: 3px solid var(--giz);
+  backdrop-filter: blur(8px);
+  color: var(--papel);
+  text-align: left;
+  box-shadow: 0 10px 30px rgb(0 0 0 / .45);
+  pointer-events: none;
+  user-select: none;
+}
+.planeta-tag__topo {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .64rem;
+  color: var(--giz);
+  letter-spacing: .06em;
+}
+.planeta-tag__topo i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+.planeta-tag__papel {
+  font-family: var(--font-disp);
+  font-size: .98rem;
+  line-height: 1.1;
+  color: var(--papel);
+}
+.planeta-tag__tech {
+  font-size: .68rem;
+  color: rgb(236 238 240 / .82);
+}
+
+.cabo-pacote-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  white-space: nowrap;
+  padding: .24rem .58rem;
+  border-radius: 999px;
+  background: rgb(3 9 27 / .88);
+  border: 1px solid rgb(56 189 248 / .55);
+  color: var(--papel);
+  font-size: .62rem;
+  box-shadow: 0 4px 16px rgb(0 0 0 / .45);
+  pointer-events: none;
+  user-select: none;
+}
+.cabo-pacote-tag i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+@media (max-width: 800px) {
+  .planeta-tag { min-width: 10.5rem; max-width: 13.5rem; padding: .42rem .6rem; }
+  .planeta-tag__papel { font-size: .84rem; }
+  .cabo-pacote-tag { font-size: .56rem; padding: .2rem .45rem; }
+}

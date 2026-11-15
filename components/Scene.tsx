@@ -9,6 +9,7 @@ import { S } from "../lib/store";
 import QuartoImperio, { QUARTO_ORIGEM } from "./QuartoImperio";
 import SistemaSolar from "./mundo/SistemaSolar";
 import FogueteEspacial from "./mundo/FogueteEspacial";
+import CabosRedeEspacial from "./mundo/CabosRedeEspacial";
 
 const GradeShockShader = dynamic(() => import("./GradeShockShader"), { ssr: false });
 
@@ -334,14 +335,15 @@ export default function Scene() {
         <Lightformer form="rect" intensity={3.6} position={[6, 3, -72]} scale={[6, 8, 1]} color="#ffd27a" />
       </Environment>
 
-      <ambientLight intensity={0.42} />
-      <directionalLight position={[-12, 8, 16]} intensity={2.6} color="#fff7e6" />
-      <directionalLight position={[10, -4, -30]} intensity={0.95} color="#38bdf8" />
+      <ambientLight intensity={0.34} />
+      <directionalLight position={[-14, 7, 14]} intensity={3.1} color="#fff7e6" />
+      <directionalLight position={[10, -5, -40]} intensity={0.85} color="#38bdf8" />
 
       <CameraMundo />
       <PrumoPendulo />
       <Suspense fallback={null}>
         <SistemaSolar />
+        <CabosRedeEspacial />
         <FogueteEspacial />
       </Suspense>
       <QuartoImperio />

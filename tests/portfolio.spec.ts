@@ -53,6 +53,7 @@ test.describe("portfolio-prumo — Awwwards Scrollytelling Z, Empresas, Devs & S
     await expect(page.locator(".hud-min")).toContainText("Som: On");
 
     await page.waitForTimeout(750);
+    await expect(page.locator(".planeta-tag").first()).toContainText("PLANETA 01");
     await shot(page, "01-hero-terra-foguete.png");
 
     // Verifica Ato 01 em profundidade Z e atualização planetária no HUD
@@ -60,6 +61,11 @@ test.describe("portfolio-prumo — Awwwards Scrollytelling Z, Empresas, Devs & S
     await page.evaluate(() => window.scrollBy(0, 320));
     await page.waitForTimeout(550);
     await shot(page, "02-ato01-mercurio-venus.png");
+
+    // Verifica Ato 02 perto de Vênus (superfície Magellan + atmosfera) e Marte
+    await page.locator("#ato-02").scrollIntoViewIfNeeded();
+    await page.waitForTimeout(550);
+    await shot(page, "02b-venus-marte-cabos.png");
 
     // Verifica Ato 04 próximo a Saturno com anéis
     await page.locator("#ato-04").scrollIntoViewIfNeeded();
