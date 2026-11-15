@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { S } from "../lib/store";
+import CtaWhatsApp from "./CtaWhatsApp";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -114,6 +115,13 @@ export default function Cena3D() {
               </li>
             ))}
           </ol>
+          <div className="cena3d__cta" data-only="empresa">
+            <CtaWhatsApp
+              camara="imperio"
+              compacto
+              mensagem="Oi Daniel! Vi a maquete 3D da Império e quero ver como apresentar meu negócio assim."
+            />
+          </div>
         </div>
       </div>
     </section>

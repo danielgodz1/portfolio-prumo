@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { S } from "../lib/store";
 
@@ -13,6 +14,11 @@ export default function NavegacaoTopo() {
     const prox = !modo2D;
     S.modo2D = prox;
     setModo2D(prox);
+    try {
+      sessionStorage.setItem("prumo-modo2d", prox ? "1" : "0");
+    } catch {
+      // ignora
+    }
     document.documentElement.classList.toggle("modo-2d", prox);
     window.dispatchEvent(new CustomEvent("prumo:modo2d", { detail: { modo2D: prox } }));
   };
@@ -22,7 +28,7 @@ export default function NavegacaoTopo() {
       <a href="#topo" className="topo__marca" data-cursor="hover" data-swap>
         Daniel dos Santos
       </a>
-      <nav aria-label="Navegação principal">
+      <nav aria-label="Navegação principal" data-only="dev">
         <a href="#camara-01" data-cursor="hover" data-swap>
           Sistemas
         </a>
@@ -36,6 +42,21 @@ export default function NavegacaoTopo() {
           Infra &amp; Sobre
         </a>
         <a href="#contato" data-cursor="hover" data-swap>
+          Contato
+        </a>
+      </nav>
+      <nav aria-label="Navegação principal" data-only="empresa">
+        <a href="#projetos" data-cursor="hover">
+          Sistemas
+        </a>
+        <a href="#camara-03" data-cursor="hover">
+          10 Modelos
+        </a>
+        <a href="#camara-02" data-cursor="hover">
+          Império 3D
+        </a>
+        <Link href="/sites-para-empresas-jau">Sites em Jaú</Link>
+        <a href="#contato" data-cursor="hover">
           Contato
         </a>
       </nav>

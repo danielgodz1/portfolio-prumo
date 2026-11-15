@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { CONTATO } from "../lib/dados";
+import { linkWhatsApp, registrarCliqueWhatsApp } from "../lib/site";
 import { S } from "../lib/store";
 import { tocarTransmissao } from "../lib/som";
 
@@ -37,18 +38,19 @@ export default function ContatoCanal() {
     }
   };
 
-  const abrirWhatsApp = () => {
+  const urlWhatsAppPadrao = linkWhatsApp({
+    camara: "contato",
+    mensagem: `Oi Daniel! Vi seu portfólio${nome ? ` (sou ${nome})` : ""} e quero conversar sobre ${assunto.trim() || "um site ou sistema para o meu negócio"}.`,
+  });
+
+  const abrirWhatsApp = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     dispararReverenciaNavi();
-    const texto = encodeURIComponent(
-      `Oi Daniel! Vi seu portfólio${nome ? ` (sou ${nome})` : ""} e quero conversar sobre ${assunto.trim() || "um projeto web / vaga"}.`,
-    );
-    const num = process.env.NEXT_PUBLIC_WHATSAPP?.replace(/\D/g, "") ?? "";
-    const url = num ? `https://wa.me/${num}?text=${texto}` : `https://wa.me/?text=${texto}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+    registrarCliqueWhatsApp("contato", S.audiencia);
+    window.open(urlWhatsAppPadrao, "_blank", "noopener,noreferrer");
   };
 
-  const abrirMensagem = (e: React.FormEvent) => {
-    e.preventDefault();
+  const enviarEmail = () => {
     dispararReverenciaNavi();
     const subject = encodeURIComponent(nome ? `Projeto · ${nome}` : "Projeto web · Contato pelo portfólio");
     const body = encodeURIComponent(assunto.trim() || "Oi Daniel, quero conversar sobre um projeto ou vaga.");
@@ -60,21 +62,30 @@ export default function ContatoCanal() {
       <div className="contato__grade">
         <div className="contato__principal painel-chanfrado">
           <p id="t-contato" className="cota">
-            Canal de transmissão · Jaú/SP · Pronto para envio
+            Canal direto · Jaú/SP · Resposta rápida
           </p>
           <a
-            className="cta disp"
-            href={`mailto:${CONTATO.email}`}
-            onClick={dispararReverenciaNavi}
+            className="cta cta--whats disp"
+            href={urlWhatsAppPadrao}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => {
+              dispararReverenciaNavi();
+              registrarCliqueWhatsApp("contato", S.audiencia);
+            }}
             data-mag
             data-cursor="hover"
-            aria-label="Vamos conversar: enviar e-mail para Daniel dos Santos"
+            aria-label="Quero ver o meu negócio assim: abrir conversa no WhatsApp com Daniel dos Santos"
           >
-            Vamos conversar
+            <span>Quero ver o meu negócio assim</span>
+            <small className="cota">Resposta pelo WhatsApp</small>
           </a>
 
           <div className="contato__email-linha">
-            <span className="contato__email cota">{CONTATO.email}</span>
+            <span className="contato__alt cota">Ou mande por e-mail:</span>
+            <a className="contato__email cota" href={`mailto:${CONTATO.email}`} onClick={dispararReverenciaNavi}>
+              {CONTATO.email}
+            </a>
             <button
               type="button"
               className={`contato__copiar cota${copiado ? " ok" : ""}`}
@@ -83,15 +94,6 @@ export default function ContatoCanal() {
             >
               {copiado ? "Copiado para a área de transferência [OK]" : "Copiar E-mail"}
             </button>
-            <button
-              type="button"
-              className="contato__whats cota"
-              onClick={abrirWhatsApp}
-              data-mag
-              aria-label="Chamar no WhatsApp com mensagem pronta"
-            >
-              Chamar no WhatsApp ↗
-            </button>
           </div>
           <p className="sr-only" role="status" aria-live="polite">
             {copiado ? "E-mail copiado para a área de transferência." : ""}
@@ -99,23 +101,23 @@ export default function ContatoCanal() {
 
           <div className="contato__redes">
             <a href={CONTATO.github} onClick={dispararReverenciaNavi} target="_blank" rel="noopener noreferrer" data-cursor="hover" data-swap>
-              GitHub · danielgodz1 ↗
+              GitHub · danielgodz1
             </a>
             <a href={CONTATO.linkedin} onClick={dispararReverenciaNavi} target="_blank" rel="noopener noreferrer" data-cursor="hover" data-swap>
-              LinkedIn · danieldossantos-ti ↗
+              LinkedIn · danieldossantos-ti
             </a>
           </div>
         </div>
 
-        <form className="contato__rapido painel-chanfrado" onSubmit={abrirMensagem} aria-label="Mensagem rápida">
-          <p className="cota">TRANSMISSÃO DIRETA // 0xTX</p>
+        <form className="contato__rapido painel-chanfrado" onSubmit={abrirWhatsApp} aria-label="Mensagem rápida">
+          <p className="cota">CONVERSA RÁPIDA · WHATSAPP OU E-MAIL</p>
           <label className="contato__campo">
             <span>Seu nome ou empresa</span>
             <input
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              placeholder="Ex.: Ricardo · Marcenaria ou Tech Lead"
+              placeholder="Ex.: Ricardo · Loja em Jaú ou Tech Lead"
               maxLength={80}
             />
           </label>
@@ -125,13 +127,18 @@ export default function ContatoCanal() {
               rows={3}
               value={assunto}
               onChange={(e) => setAssunto(e.target.value)}
-              placeholder="Sistema corporativo, infraestrutura, site 3D ou vaga."
+              placeholder="Site para empresa, sistema sob medida ou vaga."
               maxLength={400}
             />
           </label>
-          <button type="submit" className="contato__enviar cota" data-mag>
-            Abrir rascunho no e-mail →
-          </button>
+          <div className="contato__form-acoes">
+            <button type="submit" className="contato__enviar cota" data-mag>
+              Enviar pelo WhatsApp
+            </button>
+            <button type="button" className="contato__sec-email cota" onClick={enviarEmail}>
+              Prefiro enviar por e-mail
+            </button>
+          </div>
         </form>
       </div>
     </section>

@@ -5,6 +5,14 @@ export const SITE = {
   subtitulo: "Engenharia de Software, Infraestrutura & WebGL 3D",
   intro:
     "Desenvolvedor web em Jaú, SP. Construo sistemas corporativos em produção com React, Node e Supabase, administro servidores e redes críticas, e levo 3D com shaders ao navegador quando a história pede.",
+  empresaTitulo: "Sites e sistemas que trazem clientes para sua empresa.",
+  empresaSubtitulo:
+    "Da marcenaria ao atendimento diário: você mostra o que faz com clareza, recebe contatos prontos no WhatsApp e sai do papel e da planilha.",
+  empresaProvas: [
+    "Império Móveis Planejados (Jaú/SP) no ar",
+    "Sistemas FlowCheck e FlowRequest em uso diário",
+    "Demonstrações prontas para 10 ramos de negócio",
+  ],
 };
 
 export const CONTATO = {
@@ -129,6 +137,12 @@ export type Projeto = {
   resumo: string;
   texto: string;
   fatos: [string, string][];
+  empresaResumo: string;
+  empresaArco: {
+    problema: string;
+    construi: string;
+    mudou: string;
+  };
   link?: { t: string; u: string };
   links?: { t: string; u: string }[];
   cota: string;
@@ -142,6 +156,12 @@ export const PROJETOS: Projeto[] = [
     resumo: "Checklists e inspeções de segurança do trabalho, com IA, para frotas e obras.",
     texto:
       "Sistema real, em uso. Equipes de campo executam checklists de veículos, máquinas e equipamentos, registram não conformidades com foto e acompanham tudo numa central de aprovações. A IA sugere o plano de ação 5W2H e o relatório sai em PDF ou Excel.",
+    empresaResumo: "Conferência de veículos e máquinas pelo celular, sem prancheta de papel.",
+    empresaArco: {
+      problema: "Inspeções em papel se perdiam na obra e falhas em máquinas demoravam a chegar para quem decide.",
+      construi: "Sistema web para o operador marcar item a item no celular, anexar foto da falha e gerar plano de ação e laudo automático.",
+      mudou: "Aprovações numa única tela, assinatura digital com histórico completo e relatório pronto em PDF ou Excel.",
+    },
     fatos: [
       ["Tipo", "Sistema web corporativo, em produção"],
       ["Meu papel", "Concepção e desenvolvimento"],
@@ -156,6 +176,12 @@ export const PROJETOS: Projeto[] = [
     resumo: "Requisições de alimentação, almoxarifado, material, peças e hospedagem, do campo à conclusão.",
     texto:
       "Sistema real, em uso. Apontadores, encarregados, administradores e fornecedores cuidam de todo o ciclo: emissão em campo, aprovação, conferência e fechamento. No almoxarifado, a requisição se conclui sozinha 48 horas depois. Comprovantes em PDF, dados em Excel.",
+    empresaResumo: "Pedidos internos de material, peças e alimentação com acompanhamento do início ao fim.",
+    empresaArco: {
+      problema: "Pedidos de material, peças e marmitas chegavam espalhados em conversas soltas, sem saber o que foi aprovado ou entregue.",
+      construi: "Fluxo único onde quem pede lança em segundos, a gerência aprova com um clique e o fornecedor enxerga só o que precisa entregar.",
+      mudou: "Fim dos pedidos perdidos, encerramento automático após 48h no almoxarifado e comprovantes em PDF e Excel.",
+    },
     fatos: [
       ["Tipo", "Sistema web corporativo, em produção"],
       ["Meu papel", "Concepção e desenvolvimento"],
@@ -170,6 +196,12 @@ export const PROJETOS: Projeto[] = [
     resumo: "Site e configurador 3D para uma marcenaria de Jaú.",
     texto:
       "A Império faz móveis planejados em Jaú, SP. Eu cuidei da direção de arte e do código. Tudo parte de uma linha de lápis: ela desenha a planta na abertura, guia a rolagem e contorna o ambiente no 3D.",
+    empresaResumo: "O cliente visualiza os móveis em 3D antes de pedir orçamento — feito para marcenaria de Jaú.",
+    empresaArco: {
+      problema: "Em móveis planejados, fotos comuns raramente mostram o cuidado e a precisão do projeto antes da visita.",
+      construi: "Site sob medida onde uma linha de projeto desenha a planta, levanta o ambiente em 3D conforme a rolagem e destaca os detalhes até o pedido de contato.",
+      mudou: "Marca local apresentada no mesmo nível das grandes referências digitais, funcionando direto no navegador do cliente.",
+    },
     fatos: [
       ["Cliente", "Império Móveis Planejados, Jaú/SP"],
       ["Meu papel", "Direção de arte e front-end"],
@@ -225,4 +257,32 @@ export const STACK = [
   "Windows Server",
   "Hyper-V",
   "Reverse Engineering",
+];
+
+export const FAQ_JAU = [
+  {
+    pergunta: "Preciso entender de programação ou servidor para ter um site desses?",
+    resposta:
+      "Não. Eu cuido de toda a parte técnica: desenho das telas, programação, publicação no ar e ligação direta com o seu WhatsApp comercial.",
+  },
+  {
+    pergunta: "Funciona rápido no celular de clientes com 4G simples?",
+    resposta:
+      "Sim. O site abre primeiro o texto e os botões essenciais e adapta os gráficos pesados automaticamente — celulares mais simples recebem a versão leve de leitura rápida.",
+  },
+  {
+    pergunta: "Posso ver uma ideia parecida com o meu ramo antes de fechar?",
+    resposta:
+      "Sim. Tenho 10 demonstrações prontas (academia, roupas, perfumes, beleza, restaurante, hamburgueria, pizzaria, arquitetura, marcenaria e engenharia) além do site real da Império Móveis Planejados em Jaú.",
+  },
+  {
+    pergunta: "Como o cliente entra em contato comigo pelo site?",
+    resposta:
+      "Todo o percurso leva para botões diretos que abrem o seu WhatsApp já com uma mensagem pronta do visitante, sem formulários longos que espantam no celular.",
+  },
+  {
+    pergunta: "Você atende só empresas de Jaú/SP ou outras cidades também?",
+    resposta:
+      "Fico baseado em Jaú, SP, o que facilita reuniões presenciais na região, e também desenvolvo projetos completos de forma remota para empresas de outras cidades.",
+  },
 ];

@@ -5,7 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import Lenis from "lenis";
 import { S } from "../lib/store";
-import { tocarIgnicao, tocarKonami, tocarPulso } from "../lib/som";
+import { tocarCliqueCota, tocarIgnicao, tocarKonami, tocarPulso } from "../lib/som";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
@@ -41,6 +41,42 @@ export default function Experience() {
     html.classList.toggle("reduzir", reduced);
     html.classList.toggle("js", !reduced);
     html.classList.toggle("movimento-forcado", !reduced && pref === "ativo");
+
+    // Economia automática em celular simples ou conexão com economia de dados
+    const nav = navigator as Navigator & {
+      connection?: { saveData?: boolean };
+      deviceMemory?: number;
+    };
+    const modo2DSalvo = (() => {
+      try {
+        return sessionStorage.getItem("prumo-modo2d");
+      } catch {
+        return null;
+      }
+    })();
+    if (modo2DSalvo === null && (nav.connection?.saveData || (typeof nav.deviceMemory === "number" && nav.deviceMemory <= 4))) {
+      S.modo2D = true;
+      html.classList.add("modo-2d");
+      window.dispatchEvent(new CustomEvent("prumo:modo2d", { detail: { modo2D: true } }));
+    }
+
+    let ultimoDegrau = 0;
+    const atualizarCota = (p: number) => {
+      const metros = Math.round(clamp(p, 0, 1) * 12 * 100) / 100;
+      S.cotaMeters = metros;
+      const degrau = metros >= 9 ? 9 : metros >= 6 ? 6 : metros >= 3 ? 3 : 0;
+      S.cotaLabel =
+        degrau === 9 ? "IMPÉRIO 3D" : degrau === 6 ? "SISTEMAS" : degrau === 3 ? "FUNDAÇÃO" : "NÍVEL +0,00 m";
+      if (degrau !== ultimoDegrau) {
+        ultimoDegrau = degrau;
+        if (degrau > 0) tocarCliqueCota(degrau);
+        window.dispatchEvent(
+          new CustomEvent("prumo:cota", {
+            detail: { degrau, texto: `Cota +${degrau},00 m alcançada (${S.cotaLabel})` },
+          }),
+        );
+      }
+    };
 
     // ponteiro: posição e velocidade para o prumo e constelação
     const onMove = (e: PointerEvent) => {
@@ -90,6 +126,7 @@ export default function Experience() {
       const onRedScroll = () => {
         const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
         S.progress = clamp(scrollY / max, 0, 1);
+        atualizarCota(S.progress);
       };
       onRedScroll();
       addEventListener("scroll", onRedScroll, { passive: true });
@@ -108,6 +145,7 @@ export default function Experience() {
     lenis.on("scroll", (l: { velocity: number; progress: number }) => {
       S.vel = l.velocity;
       S.progress = clamp(l.progress, 0, 1);
+      atualizarCota(S.progress);
       ScrollTrigger.update();
     });
     const tick = (t: number) => lenis.raf(t * 1000);
@@ -300,16 +338,16 @@ export default function Experience() {
         tlAbertura = gsap.timeline({ onComplete: concluirAbertura });
 
         checks.forEach((el, i) => {
-          tlAbertura!.to(el, { opacity: 1, x: 0, duration: 0.16, ease: "power2.out" }, i * 0.14);
+          tlAbertura!.to(el, { opacity: 1, x: 0, duration: 0.1, ease: "power2.out" }, i * 0.08);
         });
         tlAbertura
-          .call(() => { if (num) num.textContent = "03"; }, undefined, 0.25)
-          .call(() => { if (num) num.textContent = "02"; }, undefined, 0.58)
-          .call(() => { if (num) num.textContent = "01"; }, undefined, 0.91)
-          .call(() => { if (num) num.textContent = "PRUMO"; S.ignition = 1; }, undefined, 1.2)
-          .to(".pre", { clipPath: "inset(0 0 100% 0)", duration: 0.85, ease: "expo.inOut" }, 1.35)
-          .from(sp.chars, { yPercent: 115, rotate: 6, duration: 0.95, ease: "expo.out", stagger: 0.03 }, "-=0.45")
-          .to(".entra", { opacity: 1, y: 0, duration: 0.75, ease: "power3.out", stagger: 0.1 }, "-=0.5");
+          .call(() => { if (num) num.textContent = "03"; }, undefined, 0.1)
+          .call(() => { if (num) num.textContent = "02"; }, undefined, 0.25)
+          .call(() => { if (num) num.textContent = "01"; }, undefined, 0.42)
+          .call(() => { if (num) num.textContent = "PRUMO"; S.ignition = 1; }, undefined, 0.58)
+          .to(".pre", { clipPath: "inset(0 0 100% 0)", duration: 0.55, ease: "expo.inOut" }, 0.65)
+          .from(sp.chars, { yPercent: 115, rotate: 6, duration: 0.72, ease: "expo.out", stagger: 0.025 }, "-=0.35")
+          .to(".entra", { opacity: 1, y: 0, duration: 0.55, ease: "power3.out", stagger: 0.07 }, "-=0.45");
       };
       document.fonts.ready.then(abrir);
     });

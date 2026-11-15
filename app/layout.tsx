@@ -3,8 +3,7 @@ import "@fontsource-variable/bricolage-grotesque/wdth.css";
 import "@fontsource/ibm-plex-mono/400.css";
 import "./globals.css";
 import "./emul.css";
-
-const SITE_URL = "https://portfolio-prumo.vercel.app";
+import { SITE_URL } from "../lib/site";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -55,6 +54,7 @@ const JSON_LD = {
       jobTitle: "Desenvolvedor Web",
       url: `${SITE_URL}/`,
       email: "mailto:daniel_santos172@hotmail.com",
+      telephone: "+55 14 99734-5164",
       address: {
         "@type": "PostalAddress",
         addressLocality: "Jaú",
@@ -90,7 +90,7 @@ const JSON_LD = {
 };
 
 // Roda antes da pintura: respeita preferência salva ou prefers-reduced-motion, sem esconder conteúdo.
-const ANTES = `try{var h=document.documentElement;var pref=localStorage.getItem('prumo-motion');var red=pref?pref==='reduzido':matchMedia('(prefers-reduced-motion: reduce)').matches;h.classList.add(red?'reduzir':'js');if(!red&&pref==='ativo')h.classList.add('movimento-forcado');if(matchMedia('(hover:hover) and (pointer:fine)').matches)h.classList.add('mouse')}catch(e){}`;
+const ANTES = `try{var h=document.documentElement;var q=new URLSearchParams(location.search).get('para');var s=localStorage.getItem('prumo-para');var p=(q==='dev'||q==='empresa')?q:(s==='dev'||s==='empresa'?s:'empresa');h.dataset.para=p;var pref=localStorage.getItem('prumo-motion');var red=pref?pref==='reduzido':matchMedia('(prefers-reduced-motion: reduce)').matches;h.classList.add(red?'reduzir':'js');if(!red&&pref==='ativo')h.classList.add('movimento-forcado');if(matchMedia('(hover:hover) and (pointer:fine)').matches)h.classList.add('mouse')}catch(e){}`;
 
 export default function Raiz({ children }: { children: React.ReactNode }) {
   return (

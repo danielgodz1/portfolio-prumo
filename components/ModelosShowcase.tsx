@@ -3,7 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { MODELOS } from "../lib/dados";
+import { MODELOS_BASE_URL, MODELO_CUSTOM_ATIVO } from "../lib/site";
 import { S } from "../lib/store";
+import CtaWhatsApp from "./CtaWhatsApp";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -119,6 +121,10 @@ export default function ModelosShowcase() {
   const [ativoIdx, setAtivoIdx] = useState(0);
   const [progPct, setProgPct] = useState(0);
   const [motionRev, setMotionRev] = useState(0);
+  const [empNome, setEmpNome] = useState("");
+  const [empCor, setEmpCor] = useState("#0F2C7A");
+  const [empWhats, setEmpWhats] = useState("");
+  const [empSlug, setEmpSlug] = useState(MODELOS[0]?.slug ?? "academia");
 
   useEffect(() => {
     const onMotion = () => setMotionRev((v) => v + 1);
@@ -240,9 +246,10 @@ export default function ModelosShowcase() {
       <div className="modelos-palco">
         <header className="modelos-cabecalho">
           <div>
-            <p className="cota">Câmara 03 · O Portal dos 10 Modelos · Cartuchos Interativos</p>
+            <p className="cota" data-only="dev">Câmara 03 · O Portal dos 10 Modelos · Cartuchos Interativos</p>
+            <p className="cota" data-only="empresa">Modelos prontos para adaptar ao seu negócio · 10 segmentos</p>
             <h2 id="t-modelos" className="disp">
-              Modelos para o seu negócio
+              Exemplos por área de atuação
             </h2>
           </div>
           <div className="modelos-ctrls">
@@ -250,15 +257,29 @@ export default function ModelosShowcase() {
               {String(Math.min(MODELOS.length, ativoIdx + 1)).padStart(2, "0")} / {MODELOS.length}
             </span>
             <button type="button" className="modelos-btn cota" onClick={() => irParaCard(-1)} aria-label="Modelo anterior">
-              ← Anterior
+              Anterior
             </button>
             <button type="button" className="modelos-btn cota" onClick={() => irParaCard(1)} aria-label="Próximo modelo">
-              Próximo →
+              Próximo
             </button>
           </div>
         </header>
 
-        <div ref={viewportRef} className="modelos-vp">
+        <div
+          ref={viewportRef}
+          className="modelos-vp"
+          tabIndex={0}
+          aria-label="Galeria dos 10 modelos de site. Use as setas esquerda e direita para navegar."
+          onKeyDown={(e) => {
+            if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              irParaCard(-1);
+            } else if (e.key === "ArrowRight") {
+              e.preventDefault();
+              irParaCard(1);
+            }
+          }}
+        >
           <div ref={trackRef} className="modelos-trilha">
             {MODELOS.map((m, i) => (
               <article
@@ -272,7 +293,7 @@ export default function ModelosShowcase() {
                   target="_blank"
                   rel="noopener noreferrer"
                   data-cursor="view"
-                  aria-label={`Cartucho ${String(i + 1).padStart(2, "0")} ${m.nome}: ${m.conceito} Abrir demonstração`}
+                  aria-label={`Modelo ${String(i + 1).padStart(2, "0")} ${m.nome}: ${m.conceito} Ver demonstração`}
                 >
                   <div className="mod-card__topo">
                     <span className="mod-card__num disp" aria-hidden="true">
@@ -286,7 +307,7 @@ export default function ModelosShowcase() {
                   <div className="mod-card__base">
                     <h3 className="mod-card__nome disp">{m.nome}</h3>
                     <p className="mod-card__conc">{m.conceito}</p>
-                    <span className="mod-card__acao cota">Carregar cartucho ao vivo ↗</span>
+                    <span className="mod-card__acao cota">Ver demonstração</span>
                   </div>
                 </a>
               </article>
@@ -295,15 +316,72 @@ export default function ModelosShowcase() {
             <article className="mod-card mod-card--cta mod-card--tilt" onMouseMove={onCardMove} onMouseLeave={onCardLeave}>
               <div className="mod-card__cta-inner">
                 <span className="cota">SOB MEDIDA · JAÚ/SP PARA QUALQUER CIDADE</span>
-                <h3 className="disp">Seu negócio pede um site com esse nível de acabamento?</h3>
-                <p>Sem template genérico: direção visual, código próprio e performance real no navegador.</p>
-                <a href="#contato" className="link-giz mod-card__cta-btn" data-cursor="hover">
-                  Testar uma ideia comigo →
+                <h3 className="disp">Quer ver um site desse porte com o nome e as fotos da sua empresa?</h3>
+                <p>Sem template genérico: estrutura clara para vender no WhatsApp e Google, com carregamento rápido.</p>
+                <CtaWhatsApp
+                  camara="modelos"
+                  compacto
+                  mensagem="Oi Daniel! Vi os 10 modelos no seu portfólio e quero conversar sobre um site para a minha empresa."
+                />
+                <a
+                  href={`${MODELOS_BASE_URL}/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mod-card__todos cota"
+                >
+                  Abrir vitrine completa de modelos
                 </a>
               </div>
             </article>
           </div>
         </div>
+
+        {MODELO_CUSTOM_ATIVO && (
+          <form
+            className="modelo-custom painel-chanfrado"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const u = new URL(`${MODELOS_BASE_URL}/${empSlug}/`);
+              if (empNome.trim()) u.searchParams.set("n", empNome.trim());
+              if (empCor) u.searchParams.set("c", empCor);
+              if (empWhats.replace(/\D/g, "")) u.searchParams.set("w", empWhats.replace(/\D/g, ""));
+              window.open(u.toString(), "_blank", "noopener,noreferrer");
+            }}
+          >
+            <span className="cota">TESTE COM SUA MARCA</span>
+            <strong>Ver no nome da minha empresa</strong>
+            <input
+              type="text"
+              placeholder="Nome da sua empresa"
+              value={empNome}
+              onChange={(e) => setEmpNome(e.target.value)}
+              aria-label="Nome da sua empresa"
+            />
+            <select value={empSlug} onChange={(e) => setEmpSlug(e.target.value)} aria-label="Escolha um modelo">
+              {MODELOS.map((m) => (
+                <option key={m.slug} value={m.slug}>
+                  {m.nome}
+                </option>
+              ))}
+            </select>
+            <input
+              type="color"
+              value={empCor}
+              onChange={(e) => setEmpCor(e.target.value)}
+              aria-label="Cor principal da marca"
+            />
+            <input
+              type="tel"
+              placeholder="WhatsApp (opcional)"
+              value={empWhats}
+              onChange={(e) => setEmpWhats(e.target.value)}
+              aria-label="WhatsApp opcional"
+            />
+            <button type="submit" className="link-giz">
+              Abrir demonstração personalizada
+            </button>
+          </form>
+        )}
 
         <div className="modelos-barra" aria-hidden="true">
           <span style={{ width: `${progPct}%` }} />

@@ -10,8 +10,8 @@ async function shot(page: import("@playwright/test").Page, nome: string) {
   await page.screenshot({ path: path.join(SCREENSHOT_DIR, nome), fullPage: false });
 }
 
-test.describe("portfolio-prumo — Mundo 3D 5 Câmaras & UI", () => {
-  test("carrega câmara 00 sem erros JS, renderiza WebGL e responde à NAVI-KERNEL", async ({ page }) => {
+test.describe("portfolio-prumo — Empresas, Devs, 3D & SEO", () => {
+  test("carrega modo empresa por padrão sem erros JS, com WhatsApp UTM e alterna para modo dev", async ({ page }) => {
     const erros: string[] = [];
     page.on("pageerror", (err) => erros.push(String(err)));
     page.on("response", (res) => {
@@ -22,85 +22,109 @@ test.describe("portfolio-prumo — Mundo 3D 5 Câmaras & UI", () => {
     });
 
     await page.goto("/", { waitUntil: "domcontentloaded" });
-
-    // Pula o preloader caso ainda esteja na abertura
     const pular = page.locator("[data-pre-pular]");
     if (await pular.isVisible({ timeout: 2500 }).catch(() => false)) {
       await pular.click();
     }
     await page.waitForFunction(() => document.documentElement.classList.contains("pronto"), { timeout: 10_000 });
 
-    // Verifica título hero, painel chanfrado e ausência de overflow horizontal
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Daniel");
-    await expect(page.locator(".painel-chanfrado").first()).toBeVisible();
+    // Verifica modo empresa por padrão, CTA WhatsApp com número e UTM reais, e zero overflow
+    await expect(page.locator("html")).toHaveAttribute("data-para", "empresa");
+    await expect(page.locator(".hero__titulo-emp")).toBeVisible();
+    await expect(page.locator(".hero__titulo-emp")).toContainText("clientes para sua empresa");
+
+    const linkWhatsHero = page.locator(".hero__painel a[href*='wa.me/']").first();
+    await expect(linkWhatsHero).toBeVisible();
+    const hrefWhats = await linkWhatsHero.getAttribute("href");
+    expect(hrefWhats).toContain("wa.me/5514997345164");
+    expect(decodeURIComponent(hrefWhats ?? "")).toContain("utm_source=prumo");
+    expect(decodeURIComponent(hrefWhats ?? "")).toContain("utm_campaign=hero");
 
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(1);
 
-    // Canvas 3D montado e redimensionado ao viewport (aguarda dynamic import + ResizeObserver)
+    // Canvas 3D montado e redimensionado
     const canvas = page.locator(".canvas-fundo canvas").first();
     await expect(canvas).toBeVisible({ timeout: 12_000 });
     await expect.poll(async () => (await canvas.boundingBox())?.width ?? 0, { timeout: 10_000 }).toBeGreaterThan(800);
-    await expect.poll(async () => (await canvas.boundingBox())?.height ?? 0, { timeout: 10_000 }).toBeGreaterThan(500);
 
-    await page.waitForTimeout(800);
-    await shot(page, "01-camara00-hero.png");
+    await page.waitForTimeout(500);
+    await shot(page, "01-camara00-empresa-hero.png");
 
-    // Interação com a assistente NAVI-KERNEL
+    // Alterna para perfil dev/recrutador e valida URL + NAVI easter egg
+    await page.getByRole("tab", { name: "Sou recrutador ou dev" }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-para", "dev");
+    expect(page.url()).toContain("para=dev");
+    await expect(page.locator(".hero__titulo-dev")).toBeVisible();
+    await expect(page.locator(".hero__titulo-dev")).toContainText("Daniel");
+
+    await page.locator(".navi-hud__orb-btn").click();
     const btnNavi = page.locator(".navi-hud__btn");
     await expect(btnNavi).toBeVisible();
     const textoAntes = await page.locator(".navi-hud__txt").innerText();
     await btnNavi.click();
-    const textoDepois = await page.locator(".navi-hud__txt").innerText();
-    expect(textoDepois).not.toBe(textoAntes);
+    expect(await page.locator(".navi-hud__txt").innerText()).not.toBe(textoAntes);
 
     expect(erros).toEqual([]);
   });
 
-  test("percorre câmaras 01..04, emuladores, Império 3D, 10 Modelos, Hex Viewer e Contato", async ({ page }) => {
-    await page.goto("/", { waitUntil: "domcontentloaded" });
+  test("percorre fluxo dev completo (?para=dev): infra, FlowCheck, Império 3D, 10 Modelos, Hex Viewer e Contato", async ({ page }) => {
+    await page.goto("/?para=dev", { waitUntil: "domcontentloaded" });
     await page.locator("[data-pre-pular]").click().catch(() => {});
     await page.waitForFunction(() => document.documentElement.classList.contains("pronto"), { timeout: 10_000 });
 
-    // Câmara 01: Infraestrutura (5 módulos reais)
     await page.locator("#camara-01").scrollIntoViewIfNeeded();
-    await page.waitForTimeout(450);
+    await page.waitForTimeout(350);
     await expect(page.locator(".infra-card")).toHaveCount(5);
     await shot(page, "02-camara01-infra.png");
 
-    // Emulador FlowCheck interativo
     await page.locator("#emul-flowcheck").scrollIntoViewIfNeeded();
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(350);
     const passoCheck = page.locator("#emul-flowcheck .emul__passo-btn").nth(1);
     await passoCheck.click();
     await expect(passoCheck).toHaveClass(/on/);
-    await shot(page, "03-camara01-flowcheck.png");
 
-    // Câmara 02: Império Móveis Planejados & Cena 3D
     await page.locator("#camara-02").scrollIntoViewIfNeeded();
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(350);
     await expect(page.locator("#t-imperio")).toBeVisible();
-    await expect(page.locator("#camara-02 .cena3d")).toBeVisible();
 
-    // Câmara 03: Portal dos 10 Modelos
     await page.locator("#camara-03").scrollIntoViewIfNeeded();
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(350);
     await expect(page.locator("#camara-03 .mod-card:not(.mod-card--cta)")).toHaveCount(10);
+    await expect(page.locator("#camara-03 .mod-card__acao").first()).toContainText("Ver demonstração");
     await shot(page, "04-camara03-modelos.png");
 
-    // Câmara 04: Memory Dump (Hex Viewer) & Contato
     await page.locator("#camara-04").scrollIntoViewIfNeeded();
-    await page.waitForTimeout(400);
+    await page.waitForTimeout(350);
     const secondHex = page.locator(".kernel-row").nth(1);
     await secondHex.click();
     await expect(secondHex).toHaveAttribute("aria-selected", "true");
-    await shot(page, "05-camara04-kernel.png");
 
     await page.locator("#contato").scrollIntoViewIfNeeded();
     await page.waitForTimeout(300);
     await expect(page.locator(".contato__copiar")).toBeVisible();
-    await expect(page.locator(".contato__whats")).toBeVisible();
+    await expect(page.locator(".cta--whats")).toHaveAttribute("href", /wa\.me\/5514997345164/);
     await shot(page, "06-contato.png");
+  });
+
+  test("subpáginas /sites-para-empresas-jau e /laboratorio renderizam sem erro", async ({ page }) => {
+    const erros: string[] = [];
+    page.on("pageerror", (err) => erros.push(String(err)));
+
+    await page.goto("/sites-para-empresas-jau", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+    await expect(page.locator(".subpag__faq details")).toHaveCount(5);
+    const ldJson = await page.locator('script[type="application/ld+json"]').last().innerText();
+    expect(ldJson).toContain("FAQPage");
+    expect(ldJson).not.toContain("aggregateRating");
+
+    await page.goto("/laboratorio", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { level: 1 })).toHaveCount(1);
+    await expect(page.locator(".lab-demo")).toHaveCount(3);
+    await page.getByRole("button", { name: "Disparar cota +3,00 m" }).click();
+    await expect(page.locator(".lab-demo").nth(2)).toContainText("Cota +3,00 m disparada");
+
+    expect(erros).toEqual([]);
   });
 
   test("Acesso Rápido 2D alterna layout instantaneamente e volta para Modo 3D", async ({ page }) => {

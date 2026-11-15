@@ -3,6 +3,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { S } from "../../lib/store";
+import { tocarCliqueCota } from "../../lib/som";
 
 const latLonParaVec = (latDeg: number, lonDeg: number, r: number) => {
   const lat = (latDeg * Math.PI) / 180;
@@ -325,7 +326,7 @@ export default function GloboLusion() {
           />
         </mesh>
 
-        {/* Pino marcador em Jaú/SP */}
+        {/* Pino marcador em Jaú/SP — easter egg clicável (voo curto até a cidade) */}
         <group position={pinoPos}>
           <mesh>
             <sphereGeometry args={[0.11, 14, 14]} />
@@ -334,6 +335,24 @@ export default function GloboLusion() {
           <mesh ref={pinoHaloRef}>
             <sphereGeometry args={[0.24, 14, 14]} />
             <meshBasicMaterial color="#FFD23F" transparent opacity={0.35} wireframe toneMapped={false} />
+          </mesh>
+          <mesh
+            onClick={(e) => {
+              e.stopPropagation();
+              S.globoFocus = 1;
+              S.shockwave = 1;
+              tocarCliqueCota(0);
+              window.dispatchEvent(new CustomEvent("prumo:jau-easter-egg"));
+            }}
+            onPointerOver={() => {
+              document.body.style.cursor = "pointer";
+            }}
+            onPointerOut={() => {
+              document.body.style.cursor = "";
+            }}
+          >
+            <sphereGeometry args={[0.45, 10, 10]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} />
           </mesh>
         </group>
 

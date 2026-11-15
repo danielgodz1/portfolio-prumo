@@ -3,7 +3,7 @@ import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Lightformer } from "@react-three/drei";
-import { Bloom, ChromaticAberration, EffectComposer, Noise, Vignette } from "@react-three/postprocessing";
+import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { S } from "../lib/store";
 import QuartoImperio, { QUARTO_ORIGEM } from "./QuartoImperio";
@@ -14,6 +14,42 @@ import ReliquiaKernel from "./mundo/ReliquiaKernel";
 import NaviKernel3D from "./mundo/NaviKernel3D";
 
 const GradeShockShader = dynamic(() => import("./GradeShockShader"), { ssr: false });
+
+/** Fio e peso de prumo 3D com física de mola acoplada à velocidade da rolagem (assinatura O Prumo no Hero). */
+function PrumoPendulo() {
+  const grp = useRef<THREE.Group>(null);
+  const ang = useRef(0);
+  const velAng = useRef(0);
+
+  useFrame((_, dt0) => {
+    const g = grp.current;
+    if (!g) return;
+    const vis = S.progress < 0.24;
+    g.visible = vis;
+    if (!vis || S.reduced) {
+      if (g) g.rotation.z = 0;
+      return;
+    }
+    const dt = Math.min(dt0, 0.04);
+    const force = -16 * ang.current - 3.6 * velAng.current + THREE.MathUtils.clamp(S.vel * 0.018 + S.px * 1.4, -4, 4);
+    velAng.current += force * dt;
+    ang.current += velAng.current * dt;
+    g.rotation.z = THREE.MathUtils.clamp(ang.current, -0.35, 0.35);
+  });
+
+  return (
+    <group ref={grp} position={[-4.5, 4.4, -0.8]}>
+      <mesh position={[0, -2.1, 0]}>
+        <cylinderGeometry args={[0.01, 0.01, 4.2, 6]} />
+        <meshBasicMaterial color="#7DD3FC" transparent opacity={0.55} />
+      </mesh>
+      <mesh position={[0, -4.35, 0]} rotation={[Math.PI, 0, 0]}>
+        <coneGeometry args={[0.24, 0.62, 6]} />
+        <meshStandardMaterial color="#FFD23F" emissive="#FFB800" emissiveIntensity={0.4} metalness={0.85} roughness={0.25} />
+      </mesh>
+    </group>
+  );
+}
 
 const CORES_ATMOS = [
   new THREE.Color("#03091B"), // 00 Globo Orbital
@@ -56,10 +92,36 @@ function CameraMundo() {
     [],
   );
 
+  const curvaPosEmp = useMemo(
+    () =>
+      new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, 0.35, 10.8), // 00 Globo
+        new THREE.Vector3(0, 0.45, -24.0), // +3/+6 Sistemas Reais
+        new THREE.Vector3(0, 1.8, -82.0), // Modelos
+        new THREE.Vector3(-2.0, 5.6, -55.0), // +9 Império 3D iluminada
+        new THREE.Vector3(-1.4, 2.8, -56.5), // Fechamento na maquete 2700K
+      ]),
+    [],
+  );
+
+  const curvaAlvoEmp = useMemo(
+    () =>
+      new THREE.CatmullRomCurve3([
+        new THREE.Vector3(1.9, 0.1, -1.5),
+        new THREE.Vector3(0, 0.3, -44.0),
+        new THREE.Vector3(0, 1.6, -102.0),
+        new THREE.Vector3(0, 1.0, -68.0),
+        new THREE.Vector3(-0.8, 0.9, -68.0),
+      ]),
+    [],
+  );
+
   const pMundo = useMemo(() => new THREE.Vector3(), []);
   const aMundo = useMemo(() => new THREE.Vector3(), []);
   const pQuarto = useMemo(() => new THREE.Vector3(), []);
   const aQuarto = useMemo(() => new THREE.Vector3(), []);
+  const pJau = useMemo(() => new THREE.Vector3(2.4, 0.1, 4.9), []);
+  const aJau = useMemo(() => new THREE.Vector3(3.4, -0.35, -1.2), []);
   const bgCor = useMemo(() => new THREE.Color("#03091B"), []);
 
   if (!scene.background) scene.background = new THREE.Color("#03091B");
@@ -89,12 +151,21 @@ function CameraMundo() {
     S.boost = boost.current;
     S.ignition = THREE.MathUtils.lerp(S.ignition, 0, S.reduced ? 1 : 0.04);
 
-    curvaPos.getPointAt(u, pMundo);
-    curvaAlvo.getPointAt(u, aMundo);
+    const cp = S.audiencia === "empresa" ? curvaPosEmp : curvaPos;
+    const ca = S.audiencia === "empresa" ? curvaAlvoEmp : curvaAlvo;
+    cp.getPointAt(u, pMundo);
+    ca.getPointAt(u, aMundo);
     if (!S.reduced) {
       pMundo.x += S.px * 0.65;
       pMundo.y += S.py * 0.42;
       aMundo.x += S.px * 0.35;
+    }
+
+    if (S.globoFocus > 0.005) {
+      const f = Math.sin(Math.min(1, S.globoFocus) * Math.PI);
+      pMundo.lerp(pJau, f * 0.85);
+      aMundo.lerp(aJau, f * 0.85);
+      S.globoFocus = Math.max(0, S.globoFocus - dt * 0.72);
     }
 
     if (S.quartoActive > 0.005) {
@@ -151,7 +222,7 @@ function QualityScaler({ aoDegradar }: { aoDegradar: () => void }) {
     if (done.current || S.reduced || S.paused) return;
     if (dt > 0.045) {
       lentos.current += 1;
-      if (lentos.current >= 12) {
+      if (lentos.current >= 4) {
         done.current = true;
         S.lowQuality = true;
         gl.setPixelRatio(1);
@@ -165,18 +236,11 @@ function QualityScaler({ aoDegradar }: { aoDegradar: () => void }) {
 }
 
 function Pos({ ativo }: { ativo: boolean }) {
-  const off = useMemo(() => new THREE.Vector2(0, 0), []);
-  useFrame(() => {
-    const a = Math.min(Math.abs(S.vel) * 0.00016, 0.005);
-    off.set(a, a * 0.6);
-  });
   if (!ativo) return null;
   return (
     <EffectComposer multisampling={0}>
-      <Bloom mipmapBlur luminanceThreshold={0.78} intensity={0.82} radius={0.62} />
-      <ChromaticAberration offset={off} radialModulation={false} modulationOffset={0} />
-      <Noise opacity={0.055} />
-      <Vignette offset={0.28} darkness={0.68} />
+      <Bloom mipmapBlur luminanceThreshold={0.82} intensity={0.68} radius={0.55} />
+      <Vignette offset={0.28} darkness={0.62} />
     </EffectComposer>
   );
 }
@@ -196,6 +260,7 @@ function ReduceUpdater({ reduced }: { reduced: boolean }) {
 export default function Scene() {
   const mobile = useMemo(() => window.matchMedia("(max-width:800px)").matches || (navigator.hardwareConcurrency || 8) <= 4, []);
   const [degradado, setDegradado] = useState(false);
+  const [softGpu, setSoftGpu] = useState(false);
   const [pausado, setPausado] = useState(false);
   const [reduzido, setReduzido] = useState(() => S.reduced);
   const [evSource, setEvSource] = useState<HTMLElement | undefined>(undefined);
@@ -228,20 +293,29 @@ export default function Scene() {
 
   return (
     <Canvas
-      aria-label="Mundo 3D contínuo com globo orbital, sala de servidores, maquete da Império, portais e relíquia kernel"
+      aria-label="Mundo 3D contínuo com globo orbital, prumo, sala de sistemas, maquete da Império e portais"
       eventSource={evSource}
       eventPrefix="client"
-      dpr={mobile ? [1, 1.25] : [1, 1.75]}
+      dpr={mobile || softGpu ? [1, 1.2] : [1, 1.65]}
       frameloop={pausado ? "never" : reduzido ? "demand" : "always"}
       camera={{ fov: 48, position: [0, 0.35, 10.8], near: 0.1, far: 180 }}
-      gl={{ antialias: !mobile, powerPreference: "high-performance" }}
+      gl={{ antialias: !mobile && !softGpu, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
         S.webgl = true;
+        try {
+          const raw = gl.getContext();
+          const dbg = raw.getExtension("WEBGL_debug_renderer_info");
+          const rend = dbg ? String(raw.getParameter(dbg.UNMASKED_RENDERER_WEBGL) || "") : "";
+          if (/swiftshader|llvmpipe|software|basic render/i.test(rend)) {
+            setSoftGpu(true);
+            S.lowQuality = true;
+          }
+        } catch {}
         gl.domElement.addEventListener("webglcontextlost", () => {
           S.webgl = false;
         });
       }}
-      style={{ position: "fixed", inset: 0, width: "100vw", height: "100vh" }}
+      style={{ position: "fixed", inset: 0, width: "100%", height: "100%" }}
     >
       <Environment resolution={256} frames={1}>
         <mesh scale={140}>
@@ -257,6 +331,7 @@ export default function Scene() {
       <directionalLight position={[6, 8, 10]} intensity={2.2} color="#b9dcff" />
 
       <CameraMundo />
+      <PrumoPendulo />
       <GloboLusion />
       <SalaNucleo />
       <QuartoImperio />
@@ -268,7 +343,7 @@ export default function Scene() {
       </Suspense>
       <QualityScaler aoDegradar={() => setDegradado(true)} />
       <ReduceUpdater reduced={reduzido} />
-      <Pos ativo={!mobile && !degradado && !reduzido} />
+      <Pos ativo={!mobile && !degradado && !reduzido && !softGpu} />
     </Canvas>
   );
 }

@@ -27,7 +27,7 @@ export default function ReliquiaKernel() {
   useFrame(({ clock }) => {
     const w = wrapRef.current;
     if (!w) return;
-    const vis = S.progress > 0.74;
+    const vis = S.audiencia === "dev" && S.progress > 0.74;
     w.visible = vis;
     if (!vis) return;
 

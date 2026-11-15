@@ -30,7 +30,7 @@ export default function PortalModelos3D() {
   useFrame(({ clock }) => {
     const w = wrapRef.current;
     if (!w) return;
-    const vis = S.progress > 0.58 && S.progress < 0.92;
+    const vis = S.audiencia === "empresa" ? S.progress > 0.34 && S.progress < 0.76 : S.progress > 0.58 && S.progress < 0.92;
     w.visible = vis;
     if (!vis) return;
 

@@ -8,13 +8,16 @@ import { tocarNaviHey } from "../lib/som";
 export default function NaviHud() {
   const [camara, setCamara] = useState(0);
   const [segredo, setSegredo] = useState(false);
-  const [minimizado, setMinimizado] = useState(false);
+  const [minimizado, setMinimizado] = useState(true);
   const [transmitindo, setTransmitindo] = useState(false);
 
   useEffect(() => {
-    if (window.innerWidth < 960) {
-      setMinimizado(true);
-    }
+    const onJauEgg = () => {
+      setMinimizado(false);
+      setSegredo(true);
+    };
+    window.addEventListener("prumo:jau-easter-egg", onJauEgg);
+    return () => window.removeEventListener("prumo:jau-easter-egg", onJauEgg);
   }, []);
 
   useEffect(() => {
