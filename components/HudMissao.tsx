@@ -1,44 +1,14 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
-import { CAMARAS } from "../lib/dados";
 import { S } from "../lib/store";
 import { definirSom, lerSomPreferencia } from "../lib/som";
 
-const MARCOS = [
-  { seletor: "#topo", camara: 0 },
-  { seletor: "#camara-01", camara: 1 },
-  { seletor: "#proj-flowcheck", camara: 1 },
-  { seletor: "#camara-02", camara: 2 },
-  { seletor: "#camara-03", camara: 3 },
-  { seletor: "#camara-04", camara: 4 },
-  { seletor: "#contato", camara: 4 },
-];
-
-function detectarCamaraAtual(): number {
-  const yRef = window.scrollY + window.innerHeight * 0.4;
-  let ativa = 0;
-  let topoMax = -1;
-  for (const m of MARCOS) {
-    const el = document.querySelector<HTMLElement>(m.seletor);
-    if (el && el.offsetParent !== null && yRef >= el.offsetTop && el.offsetTop >= topoMax) {
-      topoMax = el.offsetTop;
-      ativa = m.camara;
-    }
-  }
-  return ativa;
-}
-
-/** HUD técnico discreto mostrando Câmara 3D atual, velocidade de scroll, coordenada e controles. */
+/** Barra minimalista de cota e controles de acessibilidade (movimento e som). */
 export default function HudMissao() {
   const [som, setSom] = useState(false);
   const [reduzido, setReduzido] = useState(false);
   const [oculto, setOculto] = useState(false);
-  const [tele, setTele] = useState({
-    camaraNome: CAMARAS[0].nome,
-    cota: "+0,00",
-    tracao: "0.00",
-    konami: false,
-  });
+  const [cotaTexto, setCotaTexto] = useState("+0,00 m · INÍCIO");
   const [cotaAnuncio, setCotaAnuncio] = useState("");
 
   useEffect(() => {
@@ -59,31 +29,16 @@ export default function HudMissao() {
     window.addEventListener("prumo:cota", onCotaEvent);
 
     const id = window.setInterval(() => {
-      const cam = detectarCamaraAtual();
-      S.camara = cam;
-      const tracaoVal = Math.min(18.5, Math.abs(S.vel) * 0.22);
-      const info = CAMARAS[cam] ?? CAMARAS[0];
-      const cotaStr = `+${S.cotaMeters.toFixed(2).replace(".", ",")}`;
-
-      const next = {
-        camaraNome: info.nome,
-        cota: cotaStr,
-        tracao: tracaoVal.toFixed(2),
-        konami: S.konami,
-      };
-
-      setTele((prev) =>
-        prev.camaraNome === next.camaraNome &&
-        prev.cota === next.cota &&
-        prev.tracao === next.tracao &&
-        prev.konami === next.konami
-          ? prev
-          : next,
-      );
-    }, 95);
+      const p = S.progress;
+      const m = S.cotaMeters;
+      const ato =
+        p < 0.2 ? "INÍCIO" : p < 0.44 ? "ATO 01 · JAÚ" : p < 0.66 ? "ATO 02 · SISTEMAS" : p < 0.86 ? "ATO 03 · 3D" : "ATO 04 · MODELOS";
+      const next = `+${m.toFixed(2).replace(".", ",")} m · ${ato}`;
+      setCotaTexto((prev) => (prev === next ? prev : next));
+    }, 110);
 
     const ct = document.querySelector("#contato");
-    const io = ct ? new IntersectionObserver(([e]) => setOculto(e.isIntersecting), { threshold: 0.04 }) : null;
+    const io = ct ? new IntersectionObserver(([e]) => setOculto(e.isIntersecting), { threshold: 0.05 }) : null;
     if (io && ct) io.observe(ct);
 
     return () => {
@@ -118,36 +73,31 @@ export default function HudMissao() {
   }, [reduzido]);
 
   return (
-    <aside className={`hud-missao cota${oculto ? " is-oculto" : ""}`} aria-label="Telemetria da missão">
-      <div className="hud-missao__dados" aria-live="off">
-        <span className="hud-missao__cota">
-          {tele.camaraNome} · COTA {tele.cota} m
-        </span>
-        <span>TRAÇÃO {tele.tracao} m/s</span>
-        <span className="hud-missao__coord">22°17&apos;47&quot;S 48°33&apos;28&quot;W · JAÚ/SP</span>
-        {tele.konami && <span className="hud-missao__konami">TRIFORCE KERNEL 100%</span>}
-      </div>
+    <aside className={`hud-min cota${oculto ? " is-oculto" : ""}`} aria-label="Cota e controles de acessibilidade">
+      <span className="hud-min__cota" aria-live="off">
+        {cotaTexto}
+      </span>
       <span className="sr-only" role="status" aria-live="polite">
         {cotaAnuncio}
       </span>
-      <div className="hud-missao__controles">
+      <div className="hud-min__ctrls">
         <button
           type="button"
-          className="hud-missao__ctrl"
+          className="hud-min__btn"
           onClick={alternarMovimento}
           aria-pressed={!reduzido}
-          aria-label={reduzido ? "Ativar animações e movimento contínuo" : "Ativar modo de movimento reduzido"}
+          aria-label={reduzido ? "Ativar animações 3D" : "Reduzir animações"}
         >
-          {reduzido ? "[MOVIMENTO: REDUZIDO]" : "[MOVIMENTO: ATIVO]"}
+          {reduzido ? "Movimento: Reduzido" : "Movimento: 3D"}
         </button>
         <button
           type="button"
-          className="hud-missao__ctrl"
+          className="hud-min__btn"
           onClick={alternarSom}
           aria-pressed={som}
-          aria-label={som ? "Desativar áudio sintetizado" : "Ativar áudio sintetizado"}
+          aria-label={som ? "Silenciar cliques por cota" : "Ativar som sutil por cota"}
         >
-          {som ? "[SOM: ON]" : "[SOM: OFF]"}
+          {som ? "Som: On" : "Som: Off"}
         </button>
       </div>
     </aside>

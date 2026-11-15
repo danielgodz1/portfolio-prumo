@@ -134,8 +134,12 @@ export function DemoSomCota() {
   const [ultimo, setUltimo] = useState<string>("Clique em uma cota para ouvir o clique mecânico (Web Audio).");
 
   const tocar = (m: number) => {
-    definirSom(true, true);
-    tocarCliqueCota(m);
+    try {
+      definirSom(true, true);
+      tocarCliqueCota(m);
+    } catch {
+      // ignora caso Web Audio não esteja disponível no ambiente
+    }
     setUltimo(`Cota +${m},00 m disparada (pulso triangular + filtro passa-banda sem arquivos MP3).`);
   };
 

@@ -10,13 +10,12 @@ import EmulLoader from "../components/EmulLoader";
 import ModelosShowcase from "../components/ModelosShowcase";
 import ContatoCanal from "../components/ContatoCanal";
 import NavegacaoTopo from "../components/NavegacaoTopo";
-import ReguaCamaras from "../components/ReguaCamaras";
-import NaviHud from "../components/NaviHud";
 import InfraSecao from "../components/InfraSecao";
 import KernelDumpSecao from "../components/KernelDumpSecao";
 import AudienciaSwitch from "../components/AudienciaSwitch";
 import CtaWhatsApp from "../components/CtaWhatsApp";
 import TransicaoLiquida from "../components/TransicaoLiquida";
+import AtoProfundidadeZ from "../components/AtoProfundidadeZ";
 
 export default function Page() {
   const projetosNucleo = PROJETOS.filter((p) => p.id !== "imperio");
@@ -28,189 +27,167 @@ export default function Page() {
         Pular para o conteúdo
       </a>
 
-      <div className="pre" role="region" aria-label="Calibração da página">
-        <div className="pre__leg">
-          <span>Daniel dos Santos</span>
-          <span className="cota">22°17&apos;47&quot;S 48°33&apos;28&quot;W · Jaú/SP</span>
+      {/* Preloader minimalista com fio de prumo e botão pular imediato */}
+      <div className="pre pre--limpo" role="region" aria-label="Abertura">
+        <div className="pre__topo cota">
+          <span>DANIEL DOS SANTOS · JAÚ/SP</span>
+          <button type="button" className="pre__pular cota" data-pre-pular>
+            Pular [ESC]
+          </button>
         </div>
-        <ul className="pre__check cota">
-          <li data-pre-check>[OK] EIXO_DE_PRUMO</li>
-          <li data-pre-check>[OK] GLOBO_SHADER_GLSL</li>
-          <li data-pre-check>[OK] ORIGEM_JAU_SP</li>
-        </ul>
-        <div className="pre__leg" style={{ alignItems: "end" }}>
+        <div className="pre__centro">
+          <span className="pre__fio" aria-hidden="true" />
           <span className="pre__num disp" data-pre-num>
             03
           </span>
-          <div className="pre__acoes">
-            <span className="cota">prumo // câmara 00</span>
-            <button type="button" className="pre__pular cota" data-pre-pular>
-              Pular [ESC]
-            </button>
-          </div>
+        </div>
+        <div className="pre__base cota">
+          <span data-pre-check>DO ZERO AO REAL</span>
         </div>
       </div>
 
       <SceneLoader />
       <NavegacaoTopo />
-      <ReguaCamaras />
-      <NaviHud />
       <HudMissao />
       <Cursor />
 
       <main id="conteudo" className="skew palco-fluxo">
-        {/* CÂMARA 00: GLOBO PLANETÁRIO REALISTA & HERO */}
-        <section className="cena cena--hero ord-hero" id="topo" data-cena="hero" aria-label="Apresentação">
-          <div className="palco palco--hero">
-            <div className="hero__col-esq">
-              <p className="cota hero__kicker entra" data-only="dev">
-                Câmara 00 · 22°17&apos;47&quot;S 48°33&apos;28&quot;W · Jaú/SP
-              </p>
-              <p className="cota hero__kicker entra" data-only="empresa">
-                Daniel dos Santos · Jaú/SP · +0,00 m
-              </p>
+        {/* HERO CINEMATOGRÁFICO ABERTO: SEM CAIXOTES OPACOS SOBRE O 3D */}
+        <section className="hero-palco ord-hero" id="topo" data-cena="hero" aria-label="Apresentação">
+          <div className="hero-palco__miolo">
+            <p className="cota hero-palco__eyebrow entra">
+              Daniel dos Santos · Jaú, SP
+            </p>
 
-              <h1 className="hero__nome disp" data-hero-nome>
-                <span className="hero__titulo-dev" data-only="dev">
-                  <span className="linha">
-                    <span className="split">Daniel</span>
-                  </span>
-                  <span className="linha">
-                    <span className="split">dos Santos</span>
-                  </span>
+            <h1 className="hero-palco__titulo disp" data-hero-nome>
+              <span className="hero__titulo-emp" data-only="empresa">
+                Do zero ao site que vende de verdade.
+              </span>
+              <span className="hero__titulo-dev" data-only="dev">
+                <span className="linha">
+                  <span className="split">Daniel</span>
                 </span>
-                <span className="hero__titulo-emp" data-only="empresa">
-                  {SITE.empresaTitulo}
+                <span className="linha">
+                  <span className="split">dos Santos</span>
                 </span>
-              </h1>
+              </span>
+            </h1>
 
-              <p className="hero__sub hero__sub--legivel entra" data-only="dev">
-                {SITE.subtitulo}
-              </p>
-              <p className="hero__sub hero__sub--legivel entra" data-only="empresa">
-                {SITE.empresaSubtitulo}
-              </p>
+            <p className="hero-palco__sub entra" data-only="empresa">
+              {SITE.empresaSubtitulo}
+            </p>
+            <p className="hero-palco__sub entra" data-only="dev">
+              {SITE.subtitulo} · Sistemas web em produção, infraestrutura crítica e WebGL 3D.
+            </p>
 
-              <AudienciaSwitch />
-            </div>
-
-            <div className="hero__painel painel-chanfrado entra">
-              <div data-only="dev">
-                <p className="hero__intro">{SITE.intro}</p>
-                <ul className="hero__provas cota" aria-label="Evidências em produção">
-                  <li>FlowCheck &amp; FlowRequest em uso</li>
-                  <li>Império 3D publicado</li>
-                  <li>Windows Server · MikroTik · Wazuh · TOTVS RM</li>
-                </ul>
-                <div className="hero__acoes">
-                  <a href="#camara-01" className="hero__cta hero__cta--prim" data-mag data-cursor="hover">
-                    Explorar sistemas &amp; infra
-                  </a>
-                  <a href="#camara-03" className="hero__cta hero__cta--sec" data-cursor="hover" data-swap>
-                    Ver 10 modelos
-                  </a>
-                  <a href="#contato" className="hero__cta hero__cta--sec" data-cursor="hover" data-swap>
-                    Falar comigo
-                  </a>
-                </div>
-                <p className="hero__dica cota">
-                  Role para viajar pelas 5 câmaras 3D · Clique no marcador de Jaú no globo ou na NAVI-KERNEL
-                </p>
-              </div>
-
-              <div data-only="empresa">
-                <p className="hero__intro">
-                  Site feito sob medida para a sua empresa aparecer bem no Google, passar confiança imediata e levar o cliente direto para o seu WhatsApp.
-                </p>
-                <ul className="hero__provas hero__provas--emp" aria-label="O que já está funcionando">
-                  {SITE.empresaProvas.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
+            <div className="hero-palco__acoes entra">
+              <div data-only="empresa" className="hero-palco__cta-linha">
                 <CtaWhatsApp
                   camara="hero"
-                  mensagem="Oi Daniel! Vi o seu portfólio em Jaú e quero conversar sobre um site ou sistema para a minha empresa."
+                  rotulo="Quero conversar no WhatsApp"
+                  microcopy="Atendimento direto de Jaú/SP"
+                  mensagem="Oi Daniel! Vi o seu site novo e quero conversar sobre um projeto para a minha empresa."
                 />
-                <div className="hero__acoes hero__acoes--emp">
-                  <a href="#projetos" className="hero__cta hero__cta--sec" data-cursor="hover">
-                    Ver projetos reais
-                  </a>
-                  <a href="#camara-03" className="hero__cta hero__cta--sec" data-cursor="hover">
-                    Ver 10 exemplos por área
-                  </a>
-                  <Link href="/sites-para-empresas-jau" className="hero__cta hero__cta--sec">
-                    Criação de sites em Jaú
-                  </Link>
-                </div>
+                <a href="#ato-01" className="hero-palco__scroll" data-cursor="hover">
+                  Ver a história se montando
+                </a>
+              </div>
+              <div data-only="dev" className="hero-palco__cta-linha">
+                <a href="#projetos" className="hero__cta hero__cta--prim" data-mag data-cursor="hover">
+                  Explorar sistemas e 3D
+                </a>
+                <a href="#camara-03" className="hero__cta hero__cta--sec" data-cursor="hover">
+                  Ver 10 modelos
+                </a>
+                <a href="#contato" className="hero__cta hero__cta--sec" data-cursor="hover">
+                  Contato
+                </a>
               </div>
             </div>
+
+            <AudienciaSwitch />
           </div>
         </section>
 
-        {/* CÂMARA 01: INFRAESTRUTURA (SOMENTE MODO DEV/RECRUTADOR) */}
+        {/* ATO 01: ORIGEM EM JAÚ (TEXTO VEM DO FUNDO EM PROFUNDIDADE Z) */}
+        <AtoProfundidadeZ
+          id="ato-01"
+          className="ord-ato01"
+          ato="ATO 01 · +0,00 m -> +3,00 m · A FUNDAÇÃO"
+          titulo="Tudo começou resolvendo problema real no chão de operação."
+          subtitulo="Antes de qualquer linha de código virar efeito 3D, ela precisava tirar papel perdido da mão da equipe, evitar pedido atrasado e dar visibilidade para quem decide."
+        >
+          <div className="ato-z__metricas cota">
+            <span>JAÚ, SP</span>
+            <span>SISTEMAS EM USO DIÁRIO</span>
+            <span>DO ZERO AO AR</span>
+          </div>
+        </AtoProfundidadeZ>
+
+        {/* ATO 02: SISTEMAS EM USO REAL (FLOWCHECK & FLOWREQUEST) */}
+        <AtoProfundidadeZ
+          id="ato-02"
+          className="ord-ato02"
+          ato="ATO 02 · +3,00 m -> +6,00 m · SISTEMAS NO AR"
+          titulo="Ferramentas que saíram do papel para o celular da equipe."
+          subtitulo="FlowCheck e FlowRequest foram construídos para uso diário real: checklist de campo com plano de ação e requisição de materiais do pedido à conclusão."
+        />
+
         <div className="ord-infra" data-only="dev">
           <InfraSecao />
         </div>
 
-        {/* SISTEMAS REAIS: FLOWCHECK & FLOWREQUEST */}
         <section id="projetos" className="ord-projetos" aria-label="Sistemas em produção">
           {projetosNucleo.map((p, i) => (
             <Fragment key={p.id}>
-              <article className="cena" id={`proj-${p.id}`} data-cena="proj" aria-labelledby={`t-${p.id}`}>
-                <div className="palco">
-                  <div className={`proj ${i % 2 ? "proj--esq" : ""}`}>
-                    <p className="proj__cota disp" aria-hidden="true">
-                      {p.cota}
-                    </p>
-                    <div className="proj__corpo painel-chanfrado">
-                      <p className="cota" data-only="dev">
-                        Câmara 01 · Módulo {i + 1} · cota {p.cota} m
-                      </p>
-                      <p className="cota" data-only="empresa">
-                        Sistema em uso diário · cota {p.cota} m
-                      </p>
-                      <h2 id={`t-${p.id}`} className="disp">
-                        {p.nome}
-                      </h2>
-
-                      <div data-only="dev">
-                        <p>{p.resumo}</p>
-                        <p>{p.texto}</p>
-                        <dl>
-                          {p.fatos.map(([k, v]) => (
-                            <div key={k} style={{ display: "contents" }}>
-                              <dt>{k}</dt>
-                              <dd>{v}</dd>
-                            </div>
-                          ))}
-                        </dl>
-                      </div>
-
-                      {p.empresaArco && (
-                        <div className="arco-empresa" data-only="empresa">
-                          <p className="arco-empresa__resumo">{p.empresaResumo}</p>
-                          <dl className="arco-empresa__grade">
-                            <div>
-                              <dt className="cota">O problema</dt>
-                              <dd>{p.empresaArco.problema}</dd>
-                            </div>
-                            <div>
-                              <dt className="cota">O que construí</dt>
-                              <dd>{p.empresaArco.construi}</dd>
-                            </div>
-                            <div>
-                              <dt className="cota">O que mudou</dt>
-                              <dd>{p.empresaArco.mudou}</dd>
-                            </div>
-                          </dl>
-                          <CtaWhatsApp
-                            camara={p.id}
-                            compacto
-                            mensagem={`Oi Daniel! Vi o sistema ${p.nome} no seu portfólio e quero conversar sobre algo parecido para a minha empresa.`}
-                          />
-                        </div>
-                      )}
+              <article className="cena-limpa" id={`proj-${p.id}`} aria-labelledby={`t-${p.id}`}>
+                <div className="cena-limpa__grade">
+                  <div className="cena-limpa__texto">
+                    <span className="cota" data-only="dev">
+                      Módulo {i + 1} · cota {p.cota} m
+                    </span>
+                    <span className="cota" data-only="empresa">
+                      Sistema em operação real · cota {p.cota} m
+                    </span>
+                    <h3 id={`t-${p.id}`} className="disp">
+                      {p.nome}
+                    </h3>
+                    <div data-only="dev">
+                      <p>{p.resumo}</p>
+                      <p>{p.texto}</p>
+                      <dl className="cena-limpa__fatos">
+                        {p.fatos.map(([k, v]) => (
+                          <div key={k}>
+                            <dt className="cota">{k}</dt>
+                            <dd>{v}</dd>
+                          </div>
+                        ))}
+                      </dl>
                     </div>
+                    {p.empresaArco && (
+                      <div className="arco-empresa" data-only="empresa">
+                        <p className="arco-empresa__resumo">{p.empresaResumo}</p>
+                        <dl className="arco-empresa__grade">
+                          <div>
+                            <dt className="cota">O problema</dt>
+                            <dd>{p.empresaArco.problema}</dd>
+                          </div>
+                          <div>
+                            <dt className="cota">O que construí</dt>
+                            <dd>{p.empresaArco.construi}</dd>
+                          </div>
+                          <div>
+                            <dt className="cota">O que mudou</dt>
+                            <dd>{p.empresaArco.mudou}</dd>
+                          </div>
+                        </dl>
+                        <CtaWhatsApp
+                          camara={p.id}
+                          compacto
+                          mensagem={`Oi Daniel! Vi o sistema ${p.nome} no seu site e quero conversar sobre algo parecido.`}
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </article>
@@ -219,80 +196,84 @@ export default function Page() {
           ))}
         </section>
 
-        {/* CÂMARA 02: ENGENHARIA 3D & WEBGL COMERCIAL (IMPÉRIO MÓVEIS) */}
+        {/* ATO 03: DA PLANTA AO QUARTO 3D (IMPÉRIO MÓVEIS PLANEJADOS SE MONTANDO NA TELA) */}
+        <AtoProfundidadeZ
+          id="ato-03"
+          className="ord-ato03"
+          ato="ATO 03 · +6,00 m -> +9,00 m · ARQUITETURA 3D"
+          titulo="Depois a planta baixa virou um quarto 3D se montando diante de você."
+          subtitulo="Para a Império Móveis Planejados de Jaú, o site nasceu como extensão da marcenaria: do traço inicial até acender os perfis de LED 2700K."
+        />
+
         <section id="camara-02" className="ord-imperio" aria-label="Império Móveis Planejados em 3D">
-          <article className="cena" id={`proj-${imperio.id}`} data-cena="proj" aria-labelledby={`t-${imperio.id}`}>
-            <div className="palco">
-              <div className="proj">
-                <p className="proj__cota disp" aria-hidden="true">
-                  {imperio.cota}
-                </p>
-                <div className="proj__corpo painel-chanfrado">
-                  <p className="cota" data-only="dev">
-                    Câmara 02 · Arquitetura &amp; WebGL · cota {imperio.cota} m
+          <Cena3D />
+          <article className="cena-limpa" id={`proj-${imperio.id}`} aria-labelledby={`t-${imperio.id}`}>
+            <div className="cena-limpa__grade">
+              <div className="cena-limpa__texto">
+                <span className="cota">Case real em Jaú · cota {imperio.cota} m</span>
+                <h3 id={`t-${imperio.id}`} className="disp">
+                  {imperio.nome}
+                </h3>
+                <p data-only="dev">{imperio.resumo} — {imperio.texto}</p>
+                {imperio.empresaArco && (
+                  <p className="arco-empresa__resumo" data-only="empresa">
+                    {imperio.empresaResumo}
                   </p>
-                  <p className="cota" data-only="empresa">
-                    Case real em Jaú · cota {imperio.cota} m
-                  </p>
-                  <h2 id={`t-${imperio.id}`} className="disp">
-                    {imperio.nome}
-                  </h2>
-
-                  <div data-only="dev">
-                    <p>{imperio.resumo}</p>
-                    <p>{imperio.texto}</p>
-                    <dl>
-                      {imperio.fatos.map(([k, v]) => (
-                        <div key={k} style={{ display: "contents" }}>
-                          <dt>{k}</dt>
-                          <dd>{v}</dd>
-                        </div>
-                      ))}
-                    </dl>
+                )}
+                {imperio.links && (
+                  <div className="proj__links">
+                    {imperio.links.map((lk) => (
+                      <a
+                        key={lk.u}
+                        className="link-giz"
+                        href={lk.u}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-cursor="view"
+                      >
+                        {lk.t}
+                      </a>
+                    ))}
                   </div>
-
-                  {imperio.empresaArco && (
-                    <div className="arco-empresa" data-only="empresa">
-                      <p className="arco-empresa__resumo">{imperio.empresaResumo}</p>
-                      <dl className="arco-empresa__grade">
-                        <div>
-                          <dt className="cota">O desafio</dt>
-                          <dd>{imperio.empresaArco.problema}</dd>
-                        </div>
-                        <div>
-                          <dt className="cota">O que foi ao ar</dt>
-                          <dd>{imperio.empresaArco.construi}</dd>
-                        </div>
-                        <div>
-                          <dt className="cota">Para quem visita</dt>
-                          <dd>{imperio.empresaArco.mudou}</dd>
-                        </div>
-                      </dl>
-                    </div>
-                  )}
-
-                  {imperio.links && (
-                    <div className="proj__links">
-                      {imperio.links.map((lk) => (
-                        <a
-                          key={lk.u}
-                          className="link-giz"
-                          href={lk.u}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          data-cursor="view"
-                          data-swap
-                        >
-                          {lk.t}
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             </div>
           </article>
-          <Cena3D />
+        </section>
+
+        {/* ATO 04: 10 MODELOS INTERATIVOS + FECHAMENTO WHATSAPP */}
+        <AtoProfundidadeZ
+          id="ato-04"
+          className="ord-ato04"
+          ato="ATO 04 · +9,00 m -> +12,00 m · PARA O SEU NEGÓCIO"
+          titulo="Agora escolha o ponto de partida da sua empresa."
+          subtitulo="Dez segmentos com identidade visual própria e navegação imediata. Você testa ao vivo e me chama direto no WhatsApp."
+        />
+
+        <div className="ord-modelos">
+          <ModelosShowcase />
+        </div>
+
+        <section className="nums ord-nums" aria-label="Números reais">
+          <p className="nums__rot cota">Números verificáveis</p>
+          <div>
+            <b className="disp nums__odometro" data-conta="10" data-target="10">
+              10
+            </b>
+            <span>modelos prontos por segmento, de academia a engenharia civil</span>
+          </div>
+          <div>
+            <b className="disp nums__odometro" data-conta="3" data-target="3">
+              3
+            </b>
+            <span>projetos principais publicados e em uso real</span>
+          </div>
+          <div>
+            <b className="disp nums__odometro" data-conta="1" data-target="1">
+              1
+            </b>
+            <span>responsável direto do diagnóstico até a entrega no ar</span>
+          </div>
         </section>
 
         <div className="faixa ord-faixa" aria-hidden="true" data-faixa data-only="dev">
@@ -309,34 +290,6 @@ export default function Page() {
           </div>
         </div>
 
-        <section className="nums ord-nums" aria-label="Números reais">
-          <p className="nums__rot cota">Números verificáveis</p>
-          <div>
-            <b className="disp nums__odometro" data-conta="10" data-target="10" aria-label="10 modelos de site">
-              10
-            </b>
-            <span>modelos prontos por segmento, de academia a engenharia civil</span>
-          </div>
-          <div>
-            <b className="disp nums__odometro" data-conta="3" data-target="3" aria-label="3 projetos mostrados aqui">
-              3
-            </b>
-            <span>projetos principais publicados e em uso real</span>
-          </div>
-          <div>
-            <b className="disp nums__odometro" data-conta="1" data-target="1" aria-label="1 pessoa do briefing à entrega">
-              1
-            </b>
-            <span>responsável direto do diagnóstico até a entrega no ar</span>
-          </div>
-        </section>
-
-        {/* CÂMARA 03: PORTAL DOS 10 MODELOS */}
-        <div className="ord-modelos">
-          <ModelosShowcase />
-        </div>
-
-        {/* CÂMARA 04: MEMORY DUMP (SOMENTE MODO DEV/RECRUTADOR) */}
         <div className="ord-kernel" data-only="dev">
           <KernelDumpSecao />
         </div>

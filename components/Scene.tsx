@@ -12,6 +12,7 @@ import SalaNucleo from "./mundo/SalaNucleo";
 import PortalModelos3D from "./mundo/PortalModelos3D";
 import ReliquiaKernel from "./mundo/ReliquiaKernel";
 import NaviKernel3D from "./mundo/NaviKernel3D";
+import MonolitoPrumo from "./mundo/MonolitoPrumo";
 
 const GradeShockShader = dynamic(() => import("./GradeShockShader"), { ssr: false });
 
@@ -69,10 +70,10 @@ function CameraMundo() {
   const curvaPos = useMemo(
     () =>
       new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, 0.35, 10.8), // 00 Globo
-        new THREE.Vector3(0, 0.45, -18.5), // 01 Entrada Túnel
-        new THREE.Vector3(0, 0.55, -42.0), // 01 Núcleo Sistemas
-        new THREE.Vector3(-2.0, 5.6, -55.0), // 02 Império 3D
+        new THREE.Vector3(0, 0.35, 7.6), // 00 Hero Monólito & Globo
+        new THREE.Vector3(0, 0.45, -16.5), // 01 Túnel Fundação
+        new THREE.Vector3(0, 0.55, -40.0), // 01 Núcleo Sistemas
+        new THREE.Vector3(-2.4, 5.2, -56.0), // 02 Império 3D
         new THREE.Vector3(0, 1.8, -82.0), // 03 Portal Modelos
         new THREE.Vector3(0.8, 2.2, -110.5), // 04 Relíquia & Kernel
       ]),
@@ -82,8 +83,8 @@ function CameraMundo() {
   const curvaAlvo = useMemo(
     () =>
       new THREE.CatmullRomCurve3([
-        new THREE.Vector3(1.9, 0.1, -1.5), // 00 Olha levemente p/ globo à direita
-        new THREE.Vector3(0, 0.25, -34.0), // 01 Olha pelo túnel de racks
+        new THREE.Vector3(1.4, 0.05, -0.5), // 00 Enquadra Monólito + Globo à direita
+        new THREE.Vector3(0, 0.25, -34.0), // 01 Olha pelo túnel
         new THREE.Vector3(0, 0.3, -58.0), // 01 Fundo do núcleo
         new THREE.Vector3(0, 1.0, -68.0), // 02 Palco Império
         new THREE.Vector3(0, 1.6, -102.0), // 03 Corredor portais
@@ -95,11 +96,11 @@ function CameraMundo() {
   const curvaPosEmp = useMemo(
     () =>
       new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, 0.35, 10.8), // 00 Globo
-        new THREE.Vector3(0, 0.45, -24.0), // +3/+6 Sistemas Reais
-        new THREE.Vector3(0, 1.8, -82.0), // Modelos
-        new THREE.Vector3(-2.0, 5.6, -55.0), // +9 Império 3D iluminada
-        new THREE.Vector3(-1.4, 2.8, -56.5), // Fechamento na maquete 2700K
+        new THREE.Vector3(0, 0.35, 7.6), // Ato 00 Hero Monólito
+        new THREE.Vector3(0, 0.4, -14.5), // Ato 01 Origem Jaú / Túnel
+        new THREE.Vector3(0, 0.5, -36.0), // Ato 02 Sistemas reais
+        new THREE.Vector3(-2.4, 4.9, -56.5), // Ato 03 Império 3D se montando
+        new THREE.Vector3(0, 1.8, -82.0), // Ato 04 10 Modelos & Contato
       ]),
     [],
   );
@@ -107,11 +108,11 @@ function CameraMundo() {
   const curvaAlvoEmp = useMemo(
     () =>
       new THREE.CatmullRomCurve3([
-        new THREE.Vector3(1.9, 0.1, -1.5),
-        new THREE.Vector3(0, 0.3, -44.0),
-        new THREE.Vector3(0, 1.6, -102.0),
+        new THREE.Vector3(1.4, 0.05, -0.5),
+        new THREE.Vector3(0, 0.2, -32.0),
+        new THREE.Vector3(0, 0.3, -55.0),
         new THREE.Vector3(0, 1.0, -68.0),
-        new THREE.Vector3(-0.8, 0.9, -68.0),
+        new THREE.Vector3(0, 1.6, -102.0),
       ]),
     [],
   );
@@ -332,6 +333,7 @@ export default function Scene() {
 
       <CameraMundo />
       <PrumoPendulo />
+      <MonolitoPrumo />
       <GloboLusion />
       <SalaNucleo />
       <QuartoImperio />

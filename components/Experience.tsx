@@ -332,22 +332,25 @@ export default function Experience() {
           ScrollTrigger.refresh();
           return;
         }
-        const sp = SplitText.create(nome.querySelectorAll(".split"), { type: "chars" });
+        const splitsVisiveis = Array.from(nome.querySelectorAll<HTMLElement>(".split")).filter((el) => el.offsetParent !== null);
+        const sp = splitsVisiveis.length ? SplitText.create(splitsVisiveis, { type: "chars" }) : null;
         nome.classList.add("dividido");
-        gsap.set(".entra", { y: 20 });
+        gsap.set(".entra", { y: 18 });
         tlAbertura = gsap.timeline({ onComplete: concluirAbertura });
 
         checks.forEach((el, i) => {
-          tlAbertura!.to(el, { opacity: 1, x: 0, duration: 0.1, ease: "power2.out" }, i * 0.08);
+          tlAbertura!.to(el, { opacity: 1, x: 0, duration: 0.12, ease: "power2.out" }, i * 0.08);
         });
         tlAbertura
-          .call(() => { if (num) num.textContent = "03"; }, undefined, 0.1)
-          .call(() => { if (num) num.textContent = "02"; }, undefined, 0.25)
-          .call(() => { if (num) num.textContent = "01"; }, undefined, 0.42)
-          .call(() => { if (num) num.textContent = "PRUMO"; S.ignition = 1; }, undefined, 0.58)
-          .to(".pre", { clipPath: "inset(0 0 100% 0)", duration: 0.55, ease: "expo.inOut" }, 0.65)
-          .from(sp.chars, { yPercent: 115, rotate: 6, duration: 0.72, ease: "expo.out", stagger: 0.025 }, "-=0.35")
-          .to(".entra", { opacity: 1, y: 0, duration: 0.55, ease: "power3.out", stagger: 0.07 }, "-=0.45");
+          .to(".pre__fio", { scaleY: 1, duration: 0.45, ease: "expo.out" }, 0.05)
+          .call(() => { if (num) num.textContent = "00"; }, undefined, 0.05)
+          .call(() => { if (num) num.textContent = "50"; }, undefined, 0.22)
+          .call(() => { if (num) num.textContent = "100"; S.ignition = 1; }, undefined, 0.42)
+          .to(".pre", { clipPath: "inset(0 0 100% 0)", duration: 0.55, ease: "expo.inOut" }, 0.48);
+        if (sp) {
+          tlAbertura.from(sp.chars, { yPercent: 110, rotate: 4, duration: 0.68, ease: "expo.out", stagger: 0.02 }, "-=0.3");
+        }
+        tlAbertura.to(".entra", { opacity: 1, y: 0, duration: 0.5, ease: "power3.out", stagger: 0.06 }, "-=0.4");
       };
       document.fonts.ready.then(abrir);
     });
